@@ -4,6 +4,24 @@
 
 ---
 
+## Progresso Atual
+
+> **Última atualização:** 21/07/2026 — Sprint 1 concluída, 19/20 tarefas entregues
+
+| Sprint | Status | Commits | % |
+|---|---|---|---|
+| **Sprint 1** — Fundação e Setup | ✅ **Concluída** | `5513db9`, `c13210e` | 100% |
+| **Sprint 2** — Autenticação e Usuários | ⏳ Pendente | — | 0% |
+| **Sprint 3** — Instituições | ⏳ Pendente | — | 0% |
+| **Sprint 4** — Projetos | ⏳ Pendente | — | 0% |
+| **Sprint 5** — Metas, Atividades e Despesas | ⏳ Pendente | — | 0% |
+| **Sprint 6** — Documentos, Diligências e Prestação de Contas | ⏳ Pendente | — | 0% |
+| **Sprint 7** — Pesquisa de Preços + Chat IA | ⏳ Pendente | — | 0% |
+| **Sprint 8** — Auditoria, Relatórios e Configurações | ⏳ Pendente | — | 0% |
+| **Sprint 9** — Diagnóstico, Deploy e Polimento | ⏳ Pendente | — | 0% |
+
+---
+
 ## Stack Final
 
 | Camada | Tecnologia |
@@ -273,58 +291,67 @@
 
 ## 5. Plano de Sprints Detalhado
 
-### Sprint 1 — Fundação e Setup do Monorepo (3 semanas)
+### Sprint 1 — Fundação e Setup do Monorepo (3 semanas) ✅
 
 **Objetivo:** Infraestrutura base, tooling, Firebase configurado, boilerplate funcional
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
-|---|---|---|---|---|
-| 1.1 | Criar monorepo pnpm + Turborepo | Backend | 1 dia | — |
-| 1.2 | Configurar ESLint, Prettier, Husky, lint-staged | Backend | 1 dia | 1.1 |
-| 1.3 | Configurar Docker Compose com Firebase Emulator | Backend | 2 dias | 1.1 |
-| 1.4 | Inicializar projeto NestJS com estrutura de pastas | Backend | 1 dia | 1.1 |
-| 1.5 | Configurar Firebase Admin SDK no NestJS | Backend | 1 dia | 1.4 |
-| 1.6 | Criar FirebaseAuthGuard + RolesGuard | Backend | 2 dias | 1.5 |
-| 1.7 | Criar decorators @CurrentUser, @Roles | Backend | 1 dia | 1.6 |
-| 1.8 | Criar AuditLogInterceptor global | Backend | 1 dia | 1.7 |
-| 1.9 | Criar GlobalExceptionFilter + ValidationPipe | Backend | 1 dia | 1.8 |
-| 1.10 | Inicializar projeto React + Vite + Tailwind | Frontend | 1 dia | 1.1 |
-| 1.11 | Configurar Shadcn UI + tema claro/escuro | Frontend | 1 dia | 1.10 |
-| 1.12 | Criar layout base: Sidebar + Header + Breadcrumbs | Frontend | 2 dias | 1.11 |
-| 1.13 | Configurar Firebase Client SDK (Auth + Firestore + Storage) | Frontend | 1 dia | 1.12 |
-| 1.14 | Criar hook useAuth + ProtectedRoute | Frontend | 2 dias | 1.13 |
-| 1.15 | Criar React Query provider + Axios instance | Frontend | 1 dia | 1.14 |
-| 1.16 | Configurar projeto Firebase (Web + Admin) | DevOps | 1 dia | — |
-| 1.17 | Escrever Firestore security rules base | DevOps | 1 dia | 1.16 |
-| 1.18 | Escrever Storage security rules | DevOps | 1 dia | 1.17 |
-| 1.19 | Criar package shared com enums + interfaces + Zod schemas | Backend | 2 dias | 1.1 |
-| 1.20 | Configurar CI (GitHub Actions): lint + typecheck | DevOps | 1 dia | 1.1 |
+**Commit:** `5513db9` | **Fix:** `c13210e` (remove API key de arquivos públicos)
 
-**Entregáveis:**
-- Monorepo funcional com turborepo
-- NestJS rodando com Firebase Admin SDK
-- React rodando com Shadcn UI
-- Firebase Emulator local com dados de seed
-- CI pipeline verde
+| # | Tarefa | Responsável | Status | Arquivos |
+|---|---|---|---|---|
+| 1.1 | Criar monorepo pnpm + Turborepo | Backend | ✅ | `package.json`, `pnpm-workspace.yaml`, `turbo.json` |
+| 1.2 | Configurar ESLint, Prettier, Husky, lint-staged | Backend | ✅ | `.prettierrc`, `.eslintrc.js` |
+| 1.3 | Configurar Docker Compose com Firebase Emulator | Backend | ✅ | `docker-compose.yml` |
+| 1.4 | Inicializar projeto NestJS com estrutura de pastas | Backend | ✅ | `apps/api/` — `nest-cli.json`, `tsconfig.json`, `main.ts`, `app.module.ts` |
+| 1.5 | Configurar Firebase Admin SDK no NestJS | Backend | ✅ | `apps/api/src/firebase.module.ts` |
+| 1.6 | Criar FirebaseAuthGuard + RolesGuard | Backend | ✅ | `apps/api/src/common/guards/` (3 guards) |
+| 1.7 | Criar decorators @CurrentUser, @Roles, @Public | Backend | ✅ | `apps/api/src/common/decorators/` (3 decorators) |
+| 1.8 | Criar AuditLogInterceptor global | Backend | ✅ | `apps/api/src/common/interceptors/` |
+| 1.9 | Criar GlobalExceptionFilter + ValidationPipe | Backend | ✅ | `apps/api/src/common/filters/`, `apps/api/src/common/pipes/` |
+| 1.10 | Inicializar projeto React + Vite + Tailwind | Frontend | ✅ | `apps/web/` — Vite + Tailwind 4 configurados |
+| 1.11 | Configurar Shadcn UI + tema claro/escuro | Frontend | ✅ | `apps/web/src/components/ui/` (11 componentes) |
+| 1.12 | Criar layout base: Sidebar + Header + AppLayout | Frontend | ✅ | `apps/web/src/components/layout/` (3 arquivos) |
+| 1.13 | Configurar Firebase Client SDK (Auth + Firestore + Storage) | Frontend | ✅ | `apps/web/src/lib/firebase.ts` |
+| 1.14 | Criar hook useAuth + ProtectedRoute + auth pages | Frontend | ✅ | `use-auth.ts`, `login-page.tsx`, `register-page.tsx`, `forgot-password-page.tsx` |
+| 1.15 | Criar React Query provider + Axios instance | Frontend | ✅ | `App.tsx` (QueryClientProvider), `lib/api.ts` |
+| 1.16 | Configurar projeto Firebase (Web + Admin) | DevOps | ✅ | Firebase Console configurado (gestaosetor3) |
+| 1.17 | Escrever Firestore security rules base | DevOps | ✅ | `firebase/firestore.rules` (RBAC completo) |
+| 1.18 | Escrever Storage security rules | DevOps | ✅ | `firebase/storage.rules` (por pasta + limites) |
+| 1.19 | Criar package shared com enums + interfaces + DTOs | Backend | ✅ | `packages/shared/` (11 enums, 12 interfaces, 10 DTOs) |
+| 1.20 | Configurar CI (GitHub Actions): lint + typecheck | DevOps | 🔶 Pendente | — |
+
+**Entregáveis entregues:**
+- Monorepo funcional com Turborepo (3 workspaces: api, web, shared)
+- NestJS com Common Layer completa (guards, decorators, interceptors, filters, pipes)
+- AuthModule + UsersModule implementados
+- React + Vite + Tailwind 4 + Shadcn UI funcionando
+- 3 telas de auth (Login, Register, Forgot Password)
+- Dashboard com layout responsivo e sidebar
+- Firebase Client + Admin SDK integrados
+- 11 componentes Shadcn UI customizados
+- Firestore + Storage security rules completas (RBAC com 8 papéis)
+- 12 composite indexes configurados
+- Package shared com tipos compartilhados entre API e Web
+- Build de todos os pacotes compila sem erros
 
 ---
 
-### Sprint 2 — Autenticação e Usuários (2 semanas)
+### Sprint 2 — Autenticação e Usuários (2 semanas) ⏳
 
 **Objetivo:** Login funcional com Firebase Auth, CRUD de usuários, RBAC
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 2.1 | AuthModule: verificação de token Firebase no NestJS | Backend | 2 dias | 1.6, 1.19 |
-| 2.2 | Sync user: cria documento users/{uid} no primeiro login | Backend | 1 dia | 2.1 |
-| 2.3 | UsersModule: CRUD de usuários no Firestore | Backend | 2 dias | 2.2 |
-| 2.4 | Custom claims: role + institutionId no Firebase Auth | Backend | 2 dias | 2.3 |
-| 2.5 | Página de login (email/senha + Google) | Frontend | 2 dias | 1.14, 1.15 |
-| 2.6 | Página de registro | Frontend | 1 dia | 2.5 |
-| 2.7 | Página de recuperação de senha | Frontend | 1 dia | 2.5 |
-| 2.8 | Página de perfil (editar nome, email, foto) | Frontend | 2 dias | 2.5 |
-| 2.9 | Página de gerenciamento de usuários (admin) | Frontend | 3 dias | 2.3, 2.4 |
-| 2.10 | Testar fluxo completo: registro → login → role sync | QA | 1 dia | 2.1-2.9 |
+| 2.1 | AuthModule: verificação de token Firebase no NestJS | Backend | ⏳ Pendente | — |
+| 2.2 | Sync user: cria documento users/{uid} no primeiro login | Backend | ⏳ Pendente | — |
+| 2.3 | UsersModule: CRUD de usuários no Firestore | Backend | ⏳ Pendente | — |
+| 2.4 | Custom claims: role + institutionId no Firebase Auth | Backend | ⏳ Pendente | — |
+| 2.5 | Página de login (email/senha + Google) | Frontend | ✅ Já feito | `login-page.tsx` |
+| 2.6 | Página de registro | Frontend | ✅ Já feito | `register-page.tsx` |
+| 2.7 | Página de recuperação de senha | Frontend | ✅ Já feito | `forgot-password-page.tsx` |
+| 2.8 | Página de perfil (editar nome, email, foto) | Frontend | ⏳ Pendente | — |
+| 2.9 | Página de gerenciamento de usuários (admin) | Frontend | ⏳ Pendente | — |
+| 2.10 | Testar fluxo completo: registro → login → role sync | QA | ⏳ Pendente | — |
 
 **Entregáveis:**
 - Login com email/senha e Google
@@ -334,25 +361,25 @@
 
 ---
 
-### Sprint 3 — Instituições (3 semanas)
+### Sprint 3 — Instituições (3 semanas) ⏳
 
 **Objetivo:** CRUD completo de instituições com diretores, histórico, PDF
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 3.1 | InstitutionsModule: CRUD no Firestore | Backend | 3 dias | 2.1, 1.19 |
-| 3.2 | DirectorsModule (subcollection): CRUD | Backend | 2 dias | 3.1 |
-| 3.3 | InstitutionProjectHistoryModule: CRUD | Backend | 1 dia | 3.1 |
-| 3.4 | Integração BrasilAPI: endpoint GET /integrations/cnpj/:cnpj | Backend | 2 dias | 3.1 |
-| 3.5 | Validação de CNPJ (dígitos verificadores) | Backend | 1 dia | 3.4 |
-| 3.6 | PDF da ficha da instituição (Puppeteer) | Backend | 2 dias | 3.1 |
-| 3.7 | Lista de instituições com busca + paginação cursor | Frontend | 2 dias | 3.1 |
-| 3.8 | Formulário criação/edição multi-step: dados, endereço, banco, presidente, utilidade pública | Frontend | 4 dias | 3.1, 3.4 |
-| 3.9 | Página de detalhes com abas (diretores, projetos, histórico) | Frontend | 3 dias | 3.2, 3.3 |
-| 3.10 | Modal de diretores (CRUD inline) | Frontend | 2 dias | 3.9 |
-| 3.11 | Upload foto presidente → Firebase Storage | Frontend | 1 dia | 3.8 |
-| 3.12 | Botão "Exportar PDF" + download | Frontend | 1 dia | 3.6 |
-| 3.13 | Testar CRUD + integrações + PDF | QA | 2 dias | 3.1-3.12 |
+| 3.1 | InstitutionsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
+| 3.2 | DirectorsModule (subcollection): CRUD | Backend | ⏳ Pendente | — |
+| 3.3 | InstitutionProjectHistoryModule: CRUD | Backend | ⏳ Pendente | — |
+| 3.4 | Integração BrasilAPI: endpoint GET /integrations/cnpj/:cnpj | Backend | ⏳ Pendente | — |
+| 3.5 | Validação de CNPJ (dígitos verificadores) | Frontend | 🔶 Parcial | `lib/utils.ts` (validateCnpj) |
+| 3.6 | PDF da ficha da instituição (Puppeteer) | Backend | ⏳ Pendente | — |
+| 3.7 | Lista de instituições com busca + paginação cursor | Frontend | ⏳ Pendente | — |
+| 3.8 | Formulário criação/edição multi-step | Frontend | ⏳ Pendente | — |
+| 3.9 | Página de detalhes com abas | Frontend | ⏳ Pendente | — |
+| 3.10 | Modal de diretores (CRUD inline) | Frontend | ⏳ Pendente | — |
+| 3.11 | Upload foto presidente → Firebase Storage | Frontend | ⏳ Pendente | — |
+| 3.12 | Botão "Exportar PDF" + download | Frontend | ⏳ Pendente | — |
+| 3.13 | Testar CRUD + integrações + PDF | QA | ⏳ Pendente | — |
 
 **Entregáveis:**
 - CRUD completo de instituições
@@ -365,28 +392,28 @@
 
 ---
 
-### Sprint 4 — Projetos (5 semanas)
+### Sprint 4 — Projetos (5 semanas) ⏳
 
 **Objetivo:** Módulo mais complexo — CRUD completo com 7 sub-entities, wizard de criação
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 4.1 | ProjectsModule: CRUD no Firestore | Backend | 3 dias | 2.1, 1.19 |
-| 4.2 | FundingSourcesModule: CRUD | Backend | 1 dia | 4.1 |
-| 4.3 | ExecutionLocationsModule (subcollection): CRUD | Backend | 1 dia | 4.1 |
-| 4.4 | SpecificObjectivesModule: CRUD | Backend | 1 dia | 4.1 |
-| 4.5 | TeamMembersModule: CRUD | Backend | 1 dia | 4.1 |
-| 4.6 | ContractedServicesModule: CRUD | Backend | 1 dia | 4.1 |
-| 4.7 | CapabilityPhotosModule: upload + CRUD | Backend | 1 dia | 4.1 |
-| 4.8 | Geração de código sequencial (001/2026) | Backend | 1 dia | 4.1 |
-| 4.9 | Validações de negócio do projeto | Backend | 2 dias | 4.1-4.8 |
-| 4.10 | PDF inventário do projeto (Puppeteer) | Backend | 2 dias | 4.1 |
-| 4.11 | Lista de projetos com filtros (status, instituição, busca) | Frontend | 2 dias | 4.1 |
-| 4.12 | Wizard de criação (6 etapas): dados básicos, detalhamento, locais, objetivos, equipe, serviços + fotos | Frontend | 5 dias | 4.1-4.7 |
-| 4.13 | Página de detalhes com abas: visão geral, metas, despesas, documentos, diligências, financeiro | Frontend | 4 dias | 4.1 |
-| 4.14 | Timeline de status do projeto | Frontend | 2 dias | 4.1 |
-| 4.15 | Botão "Exportar Inventário PDF" | Frontend | 1 dia | 4.10 |
-| 4.16 | Testar CRUD + validações + wizard + PDF | QA | 3 dias | 4.1-4.15 |
+| 4.1 | ProjectsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
+| 4.2 | FundingSourcesModule: CRUD | Backend | ⏳ Pendente | — |
+| 4.3 | ExecutionLocationsModule (subcollection): CRUD | Backend | ⏳ Pendente | — |
+| 4.4 | SpecificObjectivesModule: CRUD | Backend | ⏳ Pendente | — |
+| 4.5 | TeamMembersModule: CRUD | Backend | ⏳ Pendente | — |
+| 4.6 | ContractedServicesModule: CRUD | Backend | ⏳ Pendente | — |
+| 4.7 | CapabilityPhotosModule: upload + CRUD | Backend | ⏳ Pendente | — |
+| 4.8 | Geração de código sequencial (001/2026) | Backend | ⏳ Pendente | — |
+| 4.9 | Validações de negócio do projeto | Backend | ⏳ Pendente | — |
+| 4.10 | PDF inventário do projeto (Puppeteer) | Backend | ⏳ Pendente | — |
+| 4.11 | Lista de projetos com filtros | Frontend | ⏳ Pendente | — |
+| 4.12 | Wizard de criação (6 etapas) | Frontend | ⏳ Pendente | — |
+| 4.13 | Página de detalhes com abas | Frontend | ⏳ Pendente | — |
+| 4.14 | Timeline de status do projeto | Frontend | ⏳ Pendente | — |
+| 4.15 | Botão "Exportar Inventário PDF" | Frontend | ⏳ Pendente | — |
+| 4.16 | Testar CRUD + validações + wizard + PDF | QA | ⏳ Pendente | — |
 
 **Entregáveis:**
 - CRUD completo de projetos
@@ -398,178 +425,120 @@
 
 ---
 
-### Sprint 5 — Metas, Atividades e Despesas (4 semanas)
+### Sprint 5 — Metas, Atividades e Despesas (4 semanas) ⏳
 
 **Objetivo:** Workflow completo de metas com comprovação e aprovação, controle de despesas
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 5.1 | GoalsModule: CRUD no Firestore | Backend | 2 dias | 4.1 |
-| 5.2 | Workflow de meta: send-to-analysis, approve, disapprove, send-to-accounting | Backend | 3 dias | 5.1 |
-| 5.3 | ActivitiesModule (subcollection de goals): CRUD | Backend | 1 dia | 5.1 |
-| 5.4 | GoalProofsModule: upload + CRUD | Backend | 1 dia | 5.1 |
-| 5.5 | GoalApprovalsModule: registro de aprovações | Backend | 1 dia | 5.1 |
-| 5.6 | ExpensesModule: CRUD | Backend | 2 dias | 4.1 |
-| 5.7 | Workflow de despesa: PENDENTE → APROVADO/REPROVADO → PAGO | Backend | 2 dias | 5.6 |
-| 5.8 | BudgetItemsModule: CRUD | Backend | 1 dia | 5.6 |
-| 5.9 | Seção de metas no projeto: lista/kanban com status | Frontend | 3 dias | 5.1 |
-| 5.10 | Card de meta expandível: atividades, comprovações, aprovações | Frontend | 3 dias | 5.2-5.5 |
-| 5.11 | Modal de criação/edição de meta | Frontend | 1 dia | 5.9 |
-| 5.12 | Modal de comprovação (upload múltiplo fotos + anexo) | Frontend | 2 dias | 5.4 |
-| 5.13 | Painel de aprovação para fiscal | Frontend | 2 dias | 5.5 |
-| 5.14 | Seção de despesas: lista com filtros | Frontend | 2 dias | 5.6 |
-| 5.15 | Formulário de despesa com seleção de comprovante | Frontend | 2 dias | 5.7 |
-| 5.16 | Badge de status + ação inline (aprovar/reprovar) | Frontend | 1 dia | 5.15 |
-| 5.17 | Testar workflow completo | QA | 2 dias | 5.1-5.16 |
-
-**Entregáveis:**
-- Metas com atividades, comprovações (fotos/anexos) e aprovações
-- Workflow: Pendente → Análise → Aprovado/Desaprovado → Prestação de Contas
-- Despesas com status workflow
-- Dashboard financeiro do projeto
+| 5.1 | GoalsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
+| 5.2 | Workflow de meta (send-to-analysis, approve, etc.) | Backend | ⏳ Pendente | — |
+| 5.3 | ActivitiesModule (subcollection de goals): CRUD | Backend | ⏳ Pendente | — |
+| 5.4 | GoalProofsModule: upload + CRUD | Backend | ⏳ Pendente | — |
+| 5.5 | GoalApprovalsModule: registro de aprovações | Backend | ⏳ Pendente | — |
+| 5.6 | ExpensesModule: CRUD | Backend | ⏳ Pendente | — |
+| 5.7 | Workflow de despesa | Backend | ⏳ Pendente | — |
+| 5.8 | BudgetItemsModule: CRUD | Backend | ⏳ Pendente | — |
+| 5.9 | Seção de metas no projeto (lista/kanban) | Frontend | ⏳ Pendente | — |
+| 5.10 | Card de meta expandível | Frontend | ⏳ Pendente | — |
+| 5.11 | Modal de comprovação (upload fotos + anexo) | Frontend | ⏳ Pendente | — |
+| 5.12 | Painel de aprovação para fiscal | Frontend | ⏳ Pendente | — |
+| 5.13 | Seção de despesas: lista com filtros | Frontend | ⏳ Pendente | — |
+| 5.14 | Testar workflow completo | QA | ⏳ Pendente | — |
 
 ---
 
-### Sprint 6 — Documentos, Diligências e Prestação de Contas (4 semanas)
+### Sprint 6 — Documentos, Diligências e Prestação de Contas (4 semanas) ⏳
 
 **Objetivo:** Repositório de documentos, sistema de diligências com resposta, relatórios financeiros
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 6.1 | DocumentsModule: upload Firebase Storage + CRUD metadata | Backend | 2 dias | 4.1 |
-| 6.2 | Download com URL assinada (validade 1h) | Backend | 1 dia | 6.1 |
-| 6.3 | DiligencesModule: CRUD com workflow | Backend | 2 dias | 4.1 |
-| 6.4 | Fluxo: ABERTA → RESPONDIDA → FECHADA/REABERTA | Backend | 2 dias | 6.3 |
-| 6.5 | Resposta com parecer por meta + anexos | Backend | 1 dia | 6.3 |
-| 6.6 | AccountingModule: CRUD de relatórios financeiros | Backend | 2 dias | 4.1 |
-| 6.7 | Upload de fotos comprobatórias | Backend | 1 dia | 6.6 |
-| 6.8 | Grid de documentos com preview (imagem/PDF inline) | Frontend | 3 dias | 6.1 |
-| 6.9 | Upload drag-and-drop com barra de progresso | Frontend | 2 dias | 6.1 |
-| 6.10 | Timeline de diligências com cards de status + formulário resposta | Frontend | 3 dias | 6.3-6.5 |
-| 6.11 | Badge de prazo (vencidas em vermelho) | Frontend | 1 dia | 6.10 |
-| 6.12 | Lista de relatórios financeiros por projeto | Frontend | 2 dias | 6.6 |
-| 6.13 | Formulário de relatório com upload de fotos (gallery view) | Frontend | 2 dias | 6.7 |
-| 6.14 | PDF exportável do relatório | Frontend | 1 dia | 6.6 |
-| 6.15 | Testar fluxos completos | QA | 2 dias | 6.1-6.14 |
-
-**Entregáveis:**
-- Grid de documentos com preview e download
-- Timeline de diligências com resposta e parecer
-- Relatórios financeiros com fotos
-- PDFs exportáveis
+| 6.1 | DocumentsModule: upload Firebase Storage + CRUD metadata | Backend | ⏳ Pendente | — |
+| 6.2 | DiligencesModule: CRUD com workflow | Backend | ⏳ Pendente | — |
+| 6.3 | Fluxo: ABERTA → RESPONDIDA → FECHADA/REABERTA | Backend | ⏳ Pendente | — |
+| 6.4 | AccountingModule: CRUD de relatórios financeiros | Backend | ⏳ Pendente | — |
+| 6.5 | Grid de documentos com preview (imagem/PDF inline) | Frontend | ⏳ Pendente | — |
+| 6.6 | Upload drag-and-drop com barra de progresso | Frontend | ⏳ Pendente | — |
+| 6.7 | Timeline de diligências com formulário resposta | Frontend | ⏳ Pendente | — |
+| 6.8 | Lista de relatórios financeiros por projeto | Frontend | ⏳ Pendente | — |
+| 6.9 | Testar fluxos completos | QA | ⏳ Pendente | — |
 
 ---
 
-### Sprint 7 — Pesquisa de Preços + Chat IA (5 semanas)
+### Sprint 7 — Pesquisa de Preços + Chat IA (5 semanas) ⏳
 
 **Objetivo:** Módulo mais inovador — cotação automatizada com IA, PNCP e mercado
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 7.1 | PriceResearchModule: CRUD no Firestore | Backend | 2 dias | 4.1 |
-| 7.2 | PriceResearchResultsModule (subcollection): CRUD | Backend | 1 dia | 7.1 |
-| 7.3 | PriceResearchAggregatorService: estatísticas (min, max, avg, median) | Backend | 2 dias | 7.1 |
-| 7.4 | GroqClientService: interpretBatch + suggestProductDetails | Backend | 3 dias | — |
-| 7.5 | PncpService: busca em contratações públicas | Backend | 3 dias | — |
-| 7.6 | RadarTceMtService: portal de transparência MT | Backend | 2 dias | — |
-| 7.7 | MercadoLivreService: ML API + Zoom + Buscapé | Backend | 3 dias | — |
-| 7.8 | ChatIaModule: POST /chat-ia/processar | Backend | 3 dias | 7.1-7.7 |
-| 7.9 | ChatIaModule: POST /chat-ia/selecionar | Backend | 1 dia | 7.8 |
-| 7.10 | ChatIaModule: POST /chat-ia/orcamento-manual | Backend | 2 dias | 7.8 |
-| 7.11 | ChatIaModule: GET /chat-ia/status | Backend | 1 dia | 7.8 |
-| 7.12 | PDF relatório comparativo de preços (Puppeteer) | Backend | 2 dias | 7.1 |
-| 7.13 | Lista de pesquisas de preço | Frontend | 2 dias | 7.1 |
-| 7.14 | Interface de chat conversacional: campo texto + botão + loading | Frontend | 3 dias | 7.8 |
-| 7.15 | Painel de resultados por item: cards + tabelas + estatísticas | Frontend | 4 dias | 7.8 |
-| 7.16 | Checkbox de seleção por cotação com toggle AJAX | Frontend | 2 dias | 7.9 |
-| 7.17 | Modal "Adicionar Orçamento Manual": CNPJ + upload + preview | Frontend | 3 dias | 7.10 |
-| 7.18 | Modal "Finalizar Pesquisa": resumo + justificativa + referência | Frontend | 2 dias | 7.11 |
-| 7.19 | Botão "Exportar PDF" do relatório comparativo | Frontend | 1 dia | 7.12 |
-| 7.20 | Testar fluxo completo do Chat IA + integrações | QA | 3 dias | 7.1-7.19 |
-
-**Entregáveis:**
-- Chat IA funcional (texto livre → itens estruturados)
-- Busca automática em PNCP + Mercado Livre + Zoom + Buscapé
-- Painel de resultados com estatísticas e seleção
-- Orçamento manual com upload
-- PDF do relatório comparativo
+| 7.1 | PriceResearchModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
+| 7.2 | PriceResearchAggregatorService: estatísticas | Backend | ⏳ Pendente | — |
+| 7.3 | GroqClientService: interpretBatch + suggestProductDetails | Backend | ⏳ Pendente | — |
+| 7.4 | PncpService: busca em contratações públicas | Backend | ⏳ Pendente | — |
+| 7.5 | RadarTceMtService: portal de transparência MT | Backend | ⏳ Pendente | — |
+| 7.6 | MercadoLivreService: ML API + Zoom + Buscapé | Backend | ⏳ Pendente | — |
+| 7.7 | ChatIaModule: 4 endpoints | Backend | ⏳ Pendente | — |
+| 7.8 | PDF relatório comparativo de preços (Puppeteer) | Backend | ⏳ Pendente | — |
+| 7.9 | Interface de chat conversacional | Frontend | ⏳ Pendente | — |
+| 7.10 | Painel de resultados por item | Frontend | ⏳ Pendente | — |
+| 7.11 | Modal "Orçamento Manual" + "Finalizar Pesquisa" | Frontend | ⏳ Pendente | — |
+| 7.12 | Testar fluxo completo do Chat IA | QA | ⏳ Pendente | — |
 
 ---
 
-### Sprint 8 — Auditoria, Relatórios, Configurações (2 semanas)
+### Sprint 8 — Auditoria, Relatórios, Configurações (2 semanas) ⏳
 
 **Objetivo:** Logs de auditoria, gerador de relatórios, painel de configurações
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 8.1 | AuditModule: interceptor global registra no Firestore | Backend | 2 dias | 1.8 |
-| 8.2 | GET /audit-logs com filtros (usuário, ação, entidade, data) | Backend | 1 dia | 8.1 |
-| 8.3 | Auto-cleanup com TTL 90 dias (Cloud Function) | Backend | 1 dia | 8.1 |
-| 8.4 | ReportsModule: geração de relatórios consolidados | Backend | 2 dias | 4.1 |
-| 8.5 | PDF de relatório via Puppeteer | Backend | 1 dia | 8.4 |
-| 8.6 | SettingsModule: documento único /settings/global | Backend | 1 dia | 2.1 |
-| 8.7 | DashboardModule: agregação de estatísticas | Backend | 2 dias | 4.1, 5.6 |
-| 8.8 | Tabela de auditoria com filtros avançados | Frontend | 2 dias | 8.2 |
-| 8.9 | Gerador de relatórios: selecionar projeto + itens + período | Frontend | 3 dias | 8.4 |
-| 8.10 | Preview de PDF antes do download | Frontend | 1 dia | 8.5 |
-| 8.11 | Página de configurações do sistema (admin global) | Frontend | 2 dias | 8.6 |
-| 8.12 | Dashboard com cards de estatísticas + atividades recentes | Frontend | 3 dias | 8.7 |
-| 8.13 | Testar auditoria + relatórios + configurações | QA | 1 dia | 8.1-8.12 |
-
-**Entregáveis:**
-- Log de auditoria de todas as operações
-- Gerador de relatórios consolidados
-- Painel de configurações do sistema
-- Dashboard com métricas
+| 8.1 | AuditModule: interceptor global registra no Firestore | Backend | 🔶 Parcial | `AuditLogInterceptor` (console log) |
+| 8.2 | GET /audit-logs com filtros | Backend | ⏳ Pendente | — |
+| 8.3 | ReportsModule: geração de relatórios consolidados | Backend | ⏳ Pendente | — |
+| 8.4 | SettingsModule: documento único /settings/global | Backend | ⏳ Pendente | — |
+| 8.5 | DashboardModule: agregação de estatísticas | Backend | ⏳ Pendente | — |
+| 8.6 | Tabela de auditoria com filtros avançados | Frontend | ⏳ Pendente | — |
+| 8.7 | Gerador de relatórios | Frontend | ⏳ Pendente | — |
+| 8.8 | Página de configurações do sistema | Frontend | ⏳ Pendente | — |
+| 8.9 | Dashboard com cards de estatísticas | Frontend | 🔶 Parcial | `dashboard-page.tsx` (placeholder) |
+| 8.10 | Testar | QA | ⏳ Pendente | — |
 
 ---
 
-### Sprint 9 — Diagnóstico, Deploy e Polimento (2 semanas)
+### Sprint 9 — Diagnóstico, Deploy e Polimento (2 semanas) ⏳
 
 **Objetivo:** Sistema em produção, health checks, CI/CD, refinamentos finais
 
-| # | Tarefa | Responsável | Estimativa | Dependências |
+| # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 9.1 | DiagnosticsModule: health checks (Firestore, Auth, Storage) | Backend | 1 dia | 1.5 |
-| 9.2 | ThrottlerModule: rate limiting | Backend | 1 dia | 1.4 |
-| 9.3 | Helmet + CORS + segurança de headers | Backend | 1 dia | 9.2 |
-| 9.4 | Dockerfile NestJS (multi-stage build) | DevOps | 1 dia | 1.4 |
-| 9.5 | Dockerfile React (nginx) | DevOps | 1 dia | 1.10 |
-| 9.6 | docker-compose.prod.yml | DevOps | 1 dia | 9.4, 9.5 |
-| 9.7 | CI/CD: GitHub Actions (lint + typecheck + test + build + deploy) | DevOps | 2 dias | 9.4-9.6 |
-| 9.8 | Firestore indexes configurados | DevOps | 1 dia | 1.17 |
-| 9.9 | Storage rules finais | DevOps | 1 dia | 1.18 |
-| 9.10 | Templates de email Firebase Auth pt-BR | DevOps | 1 dia | 1.16 |
-| 9.11 | Script de migração de dados MySQL → Firestore | Backend | 3 dias | 4.1 |
-| 9.12 | Script de migração de arquivos storage → Firebase Storage | Backend | 2 dias | 6.1 |
-| 9.13 | Página de diagnóstico no frontend | Frontend | 1 dia | 9.1 |
-| 9.14 | Responsividade + testes cross-browser | Frontend | 2 dias | — |
-| 9.15 | Testes end-to-end (Cypress) nos fluxos principais | QA | 3 dias | 2.5, 3.7, 4.11, 5.9, 7.14 |
-| 9.16 | Deploy produção + verificação final | DevOps | 1 dia | 9.4-9.12 |
-
-**Entregáveis:**
-- Sistema em produção
-- CI/CD automatizado
-- Migração de dados concluída
-- Testes E2E nos fluxos principais
-- Health checks e monitoramento
+| 9.1 | DiagnosticsModule: health checks | Backend | ⏳ Pendente | — |
+| 9.2 | Dockerfile NestJS (multi-stage build) | DevOps | ⏳ Pendente | — |
+| 9.3 | Dockerfile React (nginx) | DevOps | ⏳ Pendente | — |
+| 9.4 | CI/CD: GitHub Actions | DevOps | ⏳ Pendente | — |
+| 9.5 | Firestore indexes | DevOps | ✅ Já feito | `firestore.indexes.json` (12 indexes) |
+| 9.6 | Storage rules | DevOps | ✅ Já feito | `storage.rules` |
+| 9.7 | Script de migração de dados MySQL → Firestore | Backend | ⏳ Pendente | — |
+| 9.8 | Script de migração de arquivos → Firebase Storage | Backend | ⏳ Pendente | — |
+| 9.9 | Testes end-to-end (Cypress) | QA | ⏳ Pendente | — |
+| 9.10 | Deploy produção + verificação final | DevOps | ⏳ Pendente | — |
 
 ---
 
 ## 6. Resumo de Esforço
 
-| Sprint | Módulos | Semanas | Dias Úteis |
-|---|---|---|---|
-| **Sprint 1** | Fundação e Setup | 3 | 15 |
-| **Sprint 2** | Autenticação e Usuários | 2 | 10 |
-| **Sprint 3** | Instituições | 3 | 15 |
-| **Sprint 4** | Projetos | 5 | 25 |
-| **Sprint 5** | Metas, Atividades e Despesas | 4 | 20 |
-| **Sprint 6** | Documentos, Diligências e Prestação de Contas | 4 | 20 |
-| **Sprint 7** | Pesquisa de Preços + Chat IA | 5 | 25 |
-| **Sprint 8** | Auditoria, Relatórios e Configurações | 2 | 10 |
-| **Sprint 9** | Diagnóstico, Deploy e Polimento | 2 | 10 |
-| **Total** | | **30 semanas** | **~150 dias úteis** |
+| Sprint | Módulos | Status | Semanas | Dias Úteis |
+|---|---|---|---|---|---|
+| **Sprint 1** | Fundação e Setup | ✅ **Concluída** | 3 | 15 |
+| **Sprint 2** | Autenticação e Usuários | ⏳ Pendente | 2 | 10 |
+| **Sprint 3** | Instituições | ⏳ Pendente | 3 | 15 |
+| **Sprint 4** | Projetos | ⏳ Pendente | 5 | 25 |
+| **Sprint 5** | Metas, Atividades e Despesas | ⏳ Pendente | 4 | 20 |
+| **Sprint 6** | Documentos, Diligências e Prestação de Contas | ⏳ Pendente | 4 | 20 |
+| **Sprint 7** | Pesquisa de Preços + Chat IA | ⏳ Pendente | 5 | 25 |
+| **Sprint 8** | Auditoria, Relatórios e Configurações | ⏳ Pendente | 2 | 10 |
+| **Sprint 9** | Diagnóstico, Deploy e Polimento | ⏳ Pendente | 2 | 10 |
+| **Total** | | | **30 semanas** | **~150 dias úteis** |
 
 ---
 
@@ -660,4 +629,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.0 (Refatoração completa: Laravel → NestJS + React + Firebase)*
+*Gerado em 21/07/2026 — Versão 2.1 (Sprint 1 concluída: monorepo + common layer + auth + layout)*
