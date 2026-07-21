@@ -14,6 +14,10 @@ import { DiligencesModule } from './modules/diligences/diligences.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { PriceResearchModule } from './modules/price-research/price-research.module';
 import { IntegrationsServicesModule } from './integrations/integrations.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
@@ -24,6 +28,7 @@ import { SeedModule } from './modules/seed/seed.module';
     GoalsModule, ExpensesModule, BudgetItemsModule,
     DocumentsModule, DiligencesModule, AccountingModule,
     PriceResearchModule, IntegrationsServicesModule,
+    AuditModule, SettingsModule, DashboardModule, ReportsModule,
     SeedModule,
   ],
 })

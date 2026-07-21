@@ -20,6 +20,9 @@ import { DiligencesPage } from '@/features/diligences/diligences-page';
 import { AccountingPage } from '@/features/accounting/accounting-page';
 import { PriceResearchListPage } from '@/features/price-research/price-research-list-page';
 import { ChatIaPage } from '@/features/price-research/chat-ia-page';
+import { AuditPage } from '@/features/audit/audit-page';
+import { SettingsPage } from '@/features/settings/settings-page';
+import { ReportsPage } from '@/features/reports/reports-page';
 
 export const router = createBrowserRouter([
   {
@@ -61,18 +64,9 @@ export const router = createBrowserRouter([
       { path: 'prestacao-contas', element: <AccountingPage /> },
       { path: 'pesquisa-precos', element: <PriceResearchListPage /> },
       { path: 'pesquisa-precos/chat-ia', element: <ChatIaPage /> },
-      {
-        path: 'auditoria',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Auditoria — Sprint 8</div>,
-      },
-      {
-        path: 'relatorios',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Relatorios — Sprint 8</div>,
-      },
-      {
-        path: 'configuracoes',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Configuracoes — Sprint 8</div>,
-      },
+      { path: 'auditoria', element: <AuditPage /> },
+      { path: 'relatorios', element: <ReportsPage /> },
+      { path: 'configuracoes', element: <SettingsPage /> },
     ],
   },
 ]);
