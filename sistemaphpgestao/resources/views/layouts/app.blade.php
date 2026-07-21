@@ -409,8 +409,11 @@
         <a href="{{ route('projetos.index') }}" class="nav-item {{ request()->routeIs('projetos.*') ? 'active' : '' }}">
             <i class="bi bi-folder2-open"></i> Projetos
         </a>
-        <a href="{{ route('pesquisa-precos.index') }}" class="nav-item {{ request()->routeIs('pesquisa-precos.*') ? 'active' : '' }}">
+        <a href="{{ route('pesquisa-precos.index') }}" class="nav-item {{ request()->routeIs('pesquisa-precos.index') || request()->routeIs('pesquisa-precos.show') || request()->routeIs('pesquisa-precos.edit') ? 'active' : '' }}">
             <i class="bi bi-search"></i> Pesquisa de Preços
+        </a>
+        <a href="{{ route('pesquisa-precos.chat') }}" class="nav-item {{ request()->routeIs('pesquisa-precos.chat') ? 'active' : '' }}">
+            <i class="bi bi-stars"></i> Chat IA (Cotação)
         </a>
 
         <div class="nav-section-label">Financeiro</div>

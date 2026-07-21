@@ -487,6 +487,27 @@ class PriceResearchController extends Controller
         return $pdf->download($filename);
     }
 
+    /* ─────────── Chat IA ─────────── */
+
+    public function chat(Request $req)
+    {
+        $user = Auth::user();
+        $institutions = $user->isAdmin()
+            ? Institution::where('active', true)->orderBy('razao_social')->get()
+            : Institution::where('id', $user->institution_id)->get();
+
+        $projectsByInst = [];
+        foreach ($institutions as $inst) {
+            $projectsByInst[$inst->id] = Project::where('institution_id', $inst->id)
+                ->orderBy('nome')->get(['id', 'nome'])->toArray();
+        }
+
+        return view('price-research.chat', [
+            'institutions'   => $institutions,
+            'projectsByInst' => $projectsByInst,
+        ]);
+    }
+
     /* ─────────── Filtros locais sobre a coleção ─────────── */
 
     private function applyFilters($collection, Request $req)

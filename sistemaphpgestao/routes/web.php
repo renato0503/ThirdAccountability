@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Pesquisa de Precos Publicos / Cotacao de Projetos
     Route::get('/pesquisa-precos',                                 [PriceResearchController::class,'index'])->name('pesquisa-precos.index');
+    Route::get('/pesquisa-precos/chat-ia',                         [PriceResearchController::class,'chat'])->name('pesquisa-precos.chat');
     Route::get('/pesquisa-precos/criar',                           [PriceResearchController::class,'create'])->name('pesquisa-precos.create');
     Route::post('/pesquisa-precos',                                [PriceResearchController::class,'store'])->name('pesquisa-precos.store');
     Route::get('/pesquisa-precos/{pesquisa_preco}',                [PriceResearchController::class,'show'])->name('pesquisa-precos.show');
