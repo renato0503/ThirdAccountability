@@ -981,7 +981,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ## 13. Nova Arquitetura — Status das Sprints
 
-### 13.1 Sprints Concluídas (6 de 9)
+### 13.1 Sprints Concluídas (8 de 9)
 
 | Sprint | Módulos | Commits | Status |
 |---|---|---|---|
@@ -991,6 +991,8 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | **Sprint 4** | Projetos | `9bb5621` | ✅ **100%** |
 | **Sprint 5** | Metas, Atividades e Despesas | `551771a` | ✅ **100%** |
 | **Sprint 6** | Documentos, Diligências e Prestação de Contas | `c326380` | ✅ **100%** |
+| **Sprint 7** | Pesquisa de Preços + Chat IA | `cd7eb70` | ✅ **100%** |
+| **Sprint 8** | Auditoria, Relatórios, Configurações | `51d1097` | ✅ **100%** |
 
 ### 13.2 Estrutura do Monorepo
 
@@ -1025,6 +1027,13 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | **DocumentsModule** | CRUD `/api/projects/:id/documents` + Firebase Storage | ✅ |
 | **DiligencesModule** | CRUD `/api/projects/:id/diligences` + respond/close/reopen | ✅ |
 | **AccountingModule** | CRUD `/api/projects/:id/accounting` + photos | ✅ |
+| **PriceResearchModule** | CRUD `/api/price-research` + results + select + reference | ✅ |
+| **ChatIaModule** | `POST /api/chat-ia/processar`, `selecionar`, `orcamento-manual`, `status` | ✅ |
+| **IntegrationsServicesModule** | GroqClient, PncpService, MercadoLivreService | ✅ |
+| **AuditModule** | `GET /api/audit` com filtros (userId, acao, entidade, data) | ✅ |
+| **SettingsModule** | `GET/PUT /api/settings` (config global) | ✅ |
+| **DashboardModule** | `GET /api/dashboard/stats` (agregacao) | ✅ |
+| **ReportsModule** | `GET /api/reports/project/:id` (consolidado) | ✅ |
 
 ### 13.4 Páginas Implementadas (React)
 
@@ -1049,6 +1058,11 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | `/documentos` | DocumentsPage (grid + upload Firebase Storage) | ✅ |
 | `/diligencias` | DiligencesPage (timeline + resposta + parecer) | ✅ |
 | `/prestacao-contas` | AccountingPage (relatorios + fotos) | ✅ |
+| `/pesquisa-precos` | PriceResearchListPage (filtros + busca) | ✅ |
+| `/pesquisa-precos/chat-ia` | ChatIaPage (conversacional + resultados) | ✅ |
+| `/auditoria` | AuditPage (tabela + filtros) | ✅ |
+| `/relatorios` | ReportsPage (consolidado por projeto) | ✅ |
+| `/configuracoes` | SettingsPage (SMTP + API Keys) | ✅ |
 
 ### 13.5 Common Layer (NestJS)
 
@@ -1072,4 +1086,4 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ---
 
-*Documento gerado em 21/07/2026 — Versão 2.1 (6 sprints concluídas)*
+*Documento gerado em 21/07/2026 — Versão 2.2 (8 sprints concluídas)*

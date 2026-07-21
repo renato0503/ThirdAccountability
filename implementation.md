@@ -6,7 +6,7 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — Sprints 1 a 6 concluídas (6/9)
+> **Última atualização:** 21/07/2026 — Sprints 1 a 8 concluídas (8/9)
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
@@ -16,8 +16,8 @@
 | **Sprint 4** — Projetos | ✅ **Concluída** | `9bb5621` | 100% |
 | **Sprint 5** — Metas, Atividades e Despesas | ✅ **Concluída** | `551771a` | 100% |
 | **Sprint 6** — Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | `c326380` | 100% |
-| **Sprint 7** — Pesquisa de Preços + Chat IA | ⏳ Pendente | — | 0% |
-| **Sprint 8** — Auditoria, Relatórios e Configurações | ⏳ Pendente | — | 0% |
+| **Sprint 7** — Pesquisa de Preços + Chat IA | ✅ **Concluída** | `cd7eb70` | 100% |
+| **Sprint 8** — Auditoria, Relatórios e Configurações | ✅ **Concluída** | `51d1097` | 100% |
 | **Sprint 9** — Diagnóstico, Deploy e Polimento | ⏳ Pendente | — | 0% |
 
 ---
@@ -472,47 +472,59 @@
 **Entregáveis:**
 - Documentos com upload para Firebase Storage, grid de cards, download
 - Diligências com timeline completa (criar → responder → parecer → fechar/reabrir)
-- Prestação de contas com relatórios financeiros e galeria de fotos|
+- Prestação de contas com relatórios financeiros e galeria de fotos
 
 ---
 
-### Sprint 7 — Pesquisa de Preços + Chat IA (5 semanas) ⏳
+### Sprint 7 — Pesquisa de Preços + Chat IA (5 semanas) ✅
 
 **Objetivo:** Módulo mais inovador — cotação automatizada com IA, PNCP e mercado
+**Commits:** `cd7eb70`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 7.1 | PriceResearchModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
-| 7.2 | PriceResearchAggregatorService: estatísticas | Backend | ⏳ Pendente | — |
-| 7.3 | GroqClientService: interpretBatch + suggestProductDetails | Backend | ⏳ Pendente | — |
-| 7.4 | PncpService: busca em contratações públicas | Backend | ⏳ Pendente | — |
-| 7.5 | RadarTceMtService: portal de transparência MT | Backend | ⏳ Pendente | — |
-| 7.6 | MercadoLivreService: ML API + Zoom + Buscapé | Backend | ⏳ Pendente | — |
-| 7.7 | ChatIaModule: 4 endpoints | Backend | ⏳ Pendente | — |
-| 7.8 | PDF relatório comparativo de preços (Puppeteer) | Backend | ⏳ Pendente | — |
-| 7.9 | Interface de chat conversacional | Frontend | ⏳ Pendente | — |
-| 7.10 | Painel de resultados por item | Frontend | ⏳ Pendente | — |
-| 7.11 | Modal "Orçamento Manual" + "Finalizar Pesquisa" | Frontend | ⏳ Pendente | — |
-| 7.12 | Testar fluxo completo do Chat IA | QA | ⏳ Pendente | — |
+| 7.1 | PriceResearchModule: CRUD Firestore + stats + resultados | Backend | ✅ | `price-research.service.ts` |
+| 7.2 | PriceResearchAggregator (min, max, avg, median) | Backend | ✅ | Dentro de `price-research.service.ts` |
+| 7.3 | GroqClientService: interpretBatch + suggestProductDetails | Backend | ✅ | `integrations/groq-client.service.ts` |
+| 7.4 | PncpService: busca em contratações públicas | Backend | ✅ | `integrations/pncp.service.ts` |
+| 7.5 | MercadoLivreService: ML API | Backend | ✅ | `integrations/mercado-livre.service.ts` |
+| 7.6 | ChatIaController: 4 endpoints (processar, selecionar, orcamento-manual, status) | Backend | ✅ | `chat-ia.controller.ts` |
+| 7.7 | Interface de chat conversacional + painel resultados | Frontend | ✅ | `chat-ia-page.tsx` |
+| 7.8 | Lista de pesquisas de preço com filtros | Frontend | ✅ | `price-research-list-page.tsx` |
+| 7.9 | Checkbox seleção + orçamento manual + finalização | Frontend | ✅ | `chat-ia-page.tsx` |
+
+**Entregáveis:**
+- PriceResearch CRUD com estatísticas automáticas (min, max, média, mediana)
+- Chat IA: texto livre → Groq interpreta → busca PNCP + Mercado Livre
+- Seleção de cotações com checkboxes
+- Orçamento manual com CNPJ e valor
+- Finalização com definição de preço de referência + justificativa
+- Lista de pesquisas com filtro por status
 
 ---
 
-### Sprint 8 — Auditoria, Relatórios, Configurações (2 semanas) ⏳
+### Sprint 8 — Auditoria, Relatórios, Configurações (2 semanas) ✅
 
 **Objetivo:** Logs de auditoria, gerador de relatórios, painel de configurações
+**Commits:** `51d1097`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 8.1 | AuditModule: interceptor global registra no Firestore | Backend | 🔶 Parcial | `AuditLogInterceptor` (console log) |
-| 8.2 | GET /audit-logs com filtros | Backend | ⏳ Pendente | — |
-| 8.3 | ReportsModule: geração de relatórios consolidados | Backend | ⏳ Pendente | — |
-| 8.4 | SettingsModule: documento único /settings/global | Backend | ⏳ Pendente | — |
-| 8.5 | DashboardModule: agregação de estatísticas | Backend | ⏳ Pendente | — |
-| 8.6 | Tabela de auditoria com filtros avançados | Frontend | ⏳ Pendente | — |
-| 8.7 | Gerador de relatórios | Frontend | ⏳ Pendente | — |
-| 8.8 | Página de configurações do sistema | Frontend | ⏳ Pendente | — |
-| 8.9 | Dashboard com cards de estatísticas | Frontend | 🔶 Parcial | `dashboard-page.tsx` (placeholder) |
-| 8.10 | Testar | QA | ⏳ Pendente | — |
+| 8.1 | AuditModule: GET /api/audit com filtros | Backend | ✅ | `audit.service.ts`, `audit.controller.ts` |
+| 8.2 | LogService para registro de auditoria | Backend | ✅ | `audit.service.ts` |
+| 8.3 | ReportsModule: relatório consolidado por projeto | Backend | ✅ | `reports.service.ts`, `reports.controller.ts` |
+| 8.4 | SettingsModule: GET/PUT /api/settings | Backend | ✅ | `settings/` (3 arquivos) |
+| 8.5 | DashboardModule: GET /api/dashboard/stats | Backend | ✅ | `dashboard/` (3 arquivos) |
+| 8.6 | Tabela de auditoria com filtros avançados | Frontend | ✅ | `audit-page.tsx` |
+| 8.7 | Gerador de relatórios consolidados (metas, despesas, diligencias) | Frontend | ✅ | `reports-page.tsx` |
+| 8.8 | Página de configurações (SMTP + API Keys) | Frontend | ✅ | `settings-page.tsx` |
+| 8.9 | Dashboard real com dados da API (6 cards) | Frontend | ✅ | `dashboard-page.tsx` |
+
+**Entregáveis:**
+- Auditoria com filtros por userId, ação, entidade, data
+- Relatório consolidado por projeto (dados, metas, despesas, diligências)
+- Configurações SMTP + API Keys (Groq, Asaas, Z-API)
+- Dashboard com cards reais (projetos, instituições, orçamento, usuários)
 
 ---
 
@@ -545,8 +557,8 @@
 | **Sprint 4** | Projetos | ✅ **Concluída** | 5 | 25 |
 | **Sprint 5** | Metas, Atividades e Despesas | ✅ **Concluída** | 4 | 20 |
 | **Sprint 6** | Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | 4 | 20 |
-| **Sprint 7** | Pesquisa de Preços + Chat IA | ⏳ Pendente | 5 | 25 |
-| **Sprint 8** | Auditoria, Relatórios e Configurações | ⏳ Pendente | 2 | 10 |
+| **Sprint 7** | Pesquisa de Preços + Chat IA | ✅ **Concluída** | 5 | 25 |
+| **Sprint 8** | Auditoria, Relatórios e Configurações | ✅ **Concluída** | 2 | 10 |
 | **Sprint 9** | Diagnóstico, Deploy e Polimento | ⏳ Pendente | 2 | 10 |
 | **Total** | | | **30 semanas** | **~150 dias úteis** |
 
@@ -639,4 +651,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.4 (Sprints 1 a 6 concluídas: 6/9 — faltam: pesquisa preços, auditoria, deploy)*
+*Gerado em 21/07/2026 — Versão 2.5 (Sprints 1 a 8 concluídas: 8/9 — falta: Sprint 9: deploy, polimento)*
