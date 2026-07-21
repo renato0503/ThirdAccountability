@@ -9,6 +9,9 @@ import { FundingSourcesModule } from './modules/funding-sources/funding-sources.
 import { GoalsModule } from './modules/goals/goals.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { BudgetItemsModule } from './modules/budget-items/budget-items.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { DiligencesModule } from './modules/diligences/diligences.module';
+import { AccountingModule } from './modules/accounting/accounting.module';
 import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
@@ -17,6 +20,7 @@ import { SeedModule } from './modules/seed/seed.module';
     InstitutionsModule, IntegrationsModule,
     ProjectsModule, FundingSourcesModule,
     GoalsModule, ExpensesModule, BudgetItemsModule,
+    DocumentsModule, DiligencesModule, AccountingModule,
     SeedModule,
   ],
 })

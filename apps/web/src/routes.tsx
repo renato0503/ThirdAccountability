@@ -15,6 +15,9 @@ import { ProjectFormPage } from '@/features/projects/project-form-page';
 import { ProjectDetailPage } from '@/features/projects/project-detail-page';
 import { ExpensesListPage } from '@/features/expenses/expenses-list-page';
 import { ExpenseFormPage } from '@/features/expenses/expense-form-page';
+import { DocumentsPage } from '@/features/documents/documents-page';
+import { DiligencesPage } from '@/features/diligences/diligences-page';
+import { AccountingPage } from '@/features/accounting/accounting-page';
 
 export const router = createBrowserRouter([
   {
@@ -51,18 +54,9 @@ export const router = createBrowserRouter([
       { path: 'projetos/:id/editar', element: <ProjectFormPage /> },
       { path: 'financeiro', element: <ExpensesListPage /> },
       { path: 'despesas/nova', element: <ExpenseFormPage /> },
-      {
-        path: 'documentos',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Documentos — Sprint 6</div>,
-      },
-      {
-        path: 'diligencias',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Diligencias — Sprint 6</div>,
-      },
-      {
-        path: 'prestacao-contas',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Prestacao de Contas — Sprint 6</div>,
-      },
+      { path: 'documentos', element: <DocumentsPage /> },
+      { path: 'diligencias', element: <DiligencesPage /> },
+      { path: 'prestacao-contas', element: <AccountingPage /> },
       {
         path: 'pesquisa-precos',
         element: <div className="flex items-center justify-center h-full text-muted-foreground">Pesquisa de Precos — Sprint 7</div>,
