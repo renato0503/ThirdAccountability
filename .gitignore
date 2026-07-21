@@ -34,3 +34,33 @@ sistemaphpgestao/storage/logs/
 sistemaphpgestao/error_log
 sistemaphpgestao/config/error_log
 sistemaphpgestao/*.tar.gz
+
+# Monorepo — Node modules
+apps/*/node_modules/
+packages/*/node_modules/
+node_modules/
+
+# Monorepo — Build output
+apps/*/dist/
+packages/*/dist/
+
+# Monorepo — Environment
+apps/*/.env
+apps/*/.env.local
+apps/*/.env.*.local
+
+# Monorepo — Next.js (futuro)
+apps/web/.next/
+
+# Firebase
+firebase/firebase-debug.log
+.firebase/
+
+# Turborepo
+.turbo/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Test directories (Laravel)
+sistemaphpgestao/tests/

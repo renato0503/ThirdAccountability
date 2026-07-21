@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth.token.role == 'ADMIN_GERAL';
+    }
+
+    // Instituicoes: foto do presidente
+    match /institutions/{institutionId}/presidente_foto/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        request.auth.token.institution_id == institutionId
+      ) && request.resource.size < 2 * 1024 * 1024; // 2MB
+      allow delete: if isAdmin();
+    }
+
+    // Projetos: fotos de capacidade tecnica
+    match /projects/{projectId}/capability_photos/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO')
+      ) && request.resource.size < 4 * 1024 * 1024; // 4MB
+    }
+
+    // Projetos: comprovacoes de metas
+    match /projects/{projectId}/goal_proofs/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO')
+      ) && request.resource.size < 10 * 1024 * 1024; // 10MB
+    }
+
+    // Projetos: documentos
+    match /projects/{projectId}/documents/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO')
+      ) && request.resource.size < 20 * 1024 * 1024; // 20MB
+    }
+
+    // Pesquisa de precos: orcamentos manuais
+    match /price_research/{researchId}/manual_budgets/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO')
+      ) && request.resource.size < 10 * 1024 * 1024; // 10MB
+    }
+
+    // Prestacao de contas: fotos comprobatorias
+    match /accounting/{reportId}/photos/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        isAdmin() ||
+        hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO')
+      ) && request.resource.size < 5 * 1024 * 1024; // 5MB
+    }
+
+    // Fotos de perfil do usuario
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId
+        && request.resource.size < 2 * 1024 * 1024; // 2MB
+    }
+
+    // Negar todo o resto
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

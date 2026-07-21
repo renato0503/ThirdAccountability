@@ -1,0 +1,33 @@
+{
+  "name": "gestao-terceiro-setor",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renato0503/ThirdAccountability.git"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.0",
+    "turbo": "^2.5.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.5.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

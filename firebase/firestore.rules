@@ -1,0 +1,165 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth.token.role == 'ADMIN_GERAL';
+    }
+
+    function belongsToInstitution(institutionId) {
+      return request.auth.token.institution_id == institutionId;
+    }
+
+    function hasRole(...roles) {
+      return request.auth.token.role in roles;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // ─── Users ───
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ─── Institutions ───
+    match /institutions/{institutionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (hasRole('ADMIN_INSTITUICAO') && belongsToInstitution(institutionId));
+      allow delete: if isAdmin();
+
+      match /directors/{directorId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin() || (hasRole('ADMIN_INSTITUICAO') && belongsToInstitution(institutionId));
+      }
+
+      match /projectHistories/{historyId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin() || (hasRole('ADMIN_INSTITUICAO') && belongsToInstitution(institutionId));
+      }
+    }
+
+    // ─── Projects ───
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      allow update: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      allow delete: if isAdmin();
+
+      match /goals/{goalId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+        allow update: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO', 'FISCAL_PROJETO'));
+        allow delete: if isAdmin();
+
+        match /activities/{activityId} {
+          allow read: if isAuthenticated();
+          allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+        }
+
+        match /proofs/{proofId} {
+          allow read: if isAuthenticated();
+          allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+        }
+
+        match /approvals/{approvalId} {
+          allow read: if isAuthenticated();
+          allow write: if isAuthenticated() && (isAdmin() || hasRole('FISCAL_PROJETO', 'ADMIN_INSTITUICAO'));
+        }
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /documents/{documentId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /diligences/{diligenceId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'FISCAL_PROJETO'));
+        allow update: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'FISCAL_PROJETO', 'GESTOR_PROJETO'));
+        allow delete: if isAdmin();
+      }
+
+      match /accountingReports/{reportId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+        allow delete: if isAdmin();
+      }
+
+      match /executionLocations/{locId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /specificObjectives/{objId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /teamMembers/{memberId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /contractedServices/{serviceId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /capabilityPhotos/{photoId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+
+      match /notifications/{notifId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+    }
+
+    // ─── Funding Sources ───
+    match /fundingSources/{sourceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ─── Price Research ───
+    match /priceResearches/{researchId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      allow delete: if isAdmin();
+
+      match /results/{resultId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || hasRole('ADMIN_INSTITUICAO', 'GESTOR_PROJETO'));
+      }
+    }
+
+    // ─── Audit Logs ───
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Apenas via Admin SDK (NestJS)
+    }
+
+    // ─── Settings ───
+    match /settings/global {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

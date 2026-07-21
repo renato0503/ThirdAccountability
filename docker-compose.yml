@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  firebase-emulator:
+    image: firebasecommunity/firebase-emulator:latest
+    ports:
+      - "4000:4000"  # Emulator UI
+      - "8080:8080"  # Firestore
+      - "9099:9099"  # Auth
+      - "9199:9199"  # Storage
+      - "5001:5001"  # Functions
+    volumes:
+      - ./firebase:/firebase
+    environment:
+      - FIREBASE_PROJECT=gestaosetor3
+    command: firebase emulators:start --project gestaosetor3 --only auth,firestore,storage
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/api/src:/app/src
+      - ./packages:/app/packages
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - FIREBASE_PROJECT_ID=gestaosetor3
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase-emulator:9199
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - firebase-emulator
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web/src:/app/src
+      - ./packages:/app/packages
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+      - VITE_FIREBASE_PROJECT_ID=gestaosetor3
+      - VITE_FIREBASE_API_KEY=AIzaSyDyUHPkkKqBjLFUSgk8iYb8eYM1YQ4kFt4
+      - VITE_FIREBASE_AUTH_DOMAIN=gestaosetor3.firebaseapp.com
+      - VITE_FIREBASE_STORAGE_BUCKET=gestaosetor3.firebasestorage.app
+      - VITE_FIREBASE_APP_ID=1:137555502699:web:3b7b94beb1de287bf7f32e
+      - VITE_FIREBASE_MEASUREMENT_ID=G-DZ4EGDV6P0
+      - VITE_USE_EMULATOR=true
+    depends_on:
+      - api
