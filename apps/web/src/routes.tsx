@@ -7,6 +7,9 @@ import { ForgotPasswordPage } from '@/features/auth/forgot-password-page';
 import { DashboardPage } from '@/features/dashboard/dashboard-page';
 import { ProfilePage } from '@/features/profile/profile-page';
 import { UsersPage } from '@/features/users/users-page';
+import { InstitutionsListPage } from '@/features/institutions/institutions-list-page';
+import { InstitutionFormPage } from '@/features/institutions/institution-form-page';
+import { InstitutionDetailPage } from '@/features/institutions/institution-detail-page';
 
 export const router = createBrowserRouter([
   {
@@ -33,18 +36,10 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'perfil', element: <ProfilePage /> },
       { path: 'usuarios', element: <UsersPage /> },
-      {
-        path: 'instituicoes',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Instituicoes — Sprint 3</div>,
-      },
-      {
-        path: 'instituicoes/nova',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Novo — Sprint 3</div>,
-      },
-      {
-        path: 'instituicoes/:id',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Detalhes — Sprint 3</div>,
-      },
+      { path: 'instituicoes', element: <InstitutionsListPage /> },
+      { path: 'instituicoes/nova', element: <InstitutionFormPage /> },
+      { path: 'instituicoes/:id', element: <InstitutionDetailPage /> },
+      { path: 'instituicoes/:id/editar', element: <InstitutionFormPage /> },
       {
         path: 'projetos',
         element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Projetos — Sprint 4</div>,
