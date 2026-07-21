@@ -1,0 +1,53 @@
+===========================================================
+  GESTÃO TERCEIRO — INSTRUÇÕES DE DEPLOY
+===========================================================
+
+1. FAÇA UPLOAD de toda esta pasta para o servidor
+   (via FTP, cPanel File Manager, rsync, etc.)
+
+2. CONFIGURE O .env
+   Copie .env.example para .env e preencha:
+
+     cp .env.example .env
+
+   Campos obrigatórios:
+     APP_KEY=           (gere com: php artisan key:generate)
+     APP_URL=           (ex: https://seudominio.com.br)
+     DB_HOST=           (servidor do banco MySQL)
+     DB_DATABASE=       (nome do banco)
+     DB_USERNAME=       (usuário do banco)
+     DB_PASSWORD=       (senha do banco)
+
+3. EXECUTE OS COMANDOS (no terminal/SSH do servidor):
+
+     php artisan key:generate
+     php artisan migrate --force
+     php artisan db:seed --class=SettingSeeder
+     php artisan storage:link
+     php artisan config:cache
+     php artisan route:cache
+     php artisan view:cache
+
+4. PERMISSÕES (Linux/cPanel):
+
+     chmod -R 775 storage bootstrap/cache
+     chown -R www-data:www-data storage bootstrap/cache
+
+5. DOCUMENT ROOT
+   Aponte o domínio para a pasta: public/
+   (não a raiz do projeto)
+
+6. USUÁRIO PADRÃO (primeiro acesso):
+   Se rodou o seeder completo (DatabaseSeeder):
+     E-mail:  admin@gestao.org
+     Senha:   password
+   TROQUE A SENHA NO PRIMEIRO ACESSO em: /perfil
+
+7. CONFIGURAÇÕES DE API (sem editar servidor):
+   Acesse o painel em: /configuracoes
+   (apenas ADMIN_GERAL tem acesso)
+   Configure E-mail SMTP, Asaas, Z-API, D4Sign, etc.
+
+===========================================================
+  VERSÃO: Laravel 13 + PHP 8.3 + MySQL 5.7+
+===========================================================

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Inventário do Projeto – {{ $project->nome }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 20px 28px 40px; }
+
+        .report-header { text-align: center; margin-bottom: 14px; }
+        .report-title  { font-size: 18px; font-weight: bold; letter-spacing: .05em; text-transform: uppercase; color: #1e40af; }
+        .report-subtitle { font-size: 14px; font-weight: bold; margin-top: 4px; }
+        .report-meta { font-size: 10px; color: #666; margin-top: 4px; }
+        hr.header-rule { border: none; border-top: 3px solid #dc2626; margin: 10px 0 16px; }
+
+        .section-title { font-size: 13px; font-weight: bold; border-bottom: 2px solid #1e40af; margin-top: 22px; margin-bottom: 8px; padding: 4px 6px; color: #1e40af; background: #eff6ff; }
+        .subsection-title { font-size: 12px; font-weight: bold; color: #111; margin: 12px 0 6px; border-left: 3px solid #dc2626; padding-left: 6px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        table th { background: #1e40af; color: #fff; text-align: left; padding: 5px 6px; font-size: 10px; font-weight: 600; border: 1px solid #1e3a8a; }
+        table td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+        table tr:last-child td { border-bottom: none; }
+        table.striped tbody tr:nth-child(even) td { background: #fafafa; }
+
+        .data-grid { width: 100%; border-collapse: collapse; }
+        .data-grid td.label { color: #555; font-weight: 500; width: 28%; padding: 4px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .data-grid td.value { padding: 4px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; background: #e2e8f0; color: #333; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+
+        .text-block { font-size: 10.5px; line-height: 1.6; text-align: justify; white-space: pre-wrap; margin-top: 4px; }
+        .avoid-break { page-break-inside: avoid; }
+        .no-data { color: #888; font-style: italic; }
+        .text-right { text-align: right; }
+        .text-muted { color: #666; }
+
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 4px 28px; font-size: 9px; color: #888; border-top: 1px solid #ccc; background: #fff; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="footer">
+    Inventário gerado em {{ now()->format('d/m/Y H:i') }} | Projeto: {{ $project->nome }}
+</div>
+
+<div class="report-header">
+    <div class="report-title">Inventário do Projeto</div>
+    <div class="report-subtitle">{{ $project->nome }}</div>
+    @if($project->codigo)
+        <div class="report-meta">Código: {{ $project->codigo }}</div>
+    @endif
+    <div class="report-meta">
+        @if($project->institution)Entidade: {{ $project->institution->razao_social ?? $project->institution->nome_fantasia }} &nbsp;&bull;&nbsp;@endif
+        Gerado em: {{ now()->format('d/m/Y H:i') }}
+    </div>
+</div>
+
+<hr class="header-rule">
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     1. IDENTIFICAÇÃO
+═══════════════════════════════════════════════════════════════════ --}}
+<div class="section-title">1. Identificação</div>
+
+<div class="avoid-break">
+    <table class="data-grid">
+        <tbody>
+            <tr>
+                <td class="label">Nome do Projeto</td>
+                <td class="value" colspan="3">{{ $project->nome ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Código</td>
+                <td class="value">{{ $project->codigo ?? '—' }}</td>
+                <td class="label">Nº Proposta</td>
+                <td class="value">{{ $project->numero_proposta ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Status</td>
+                <td class="value">
+                    <span class="badge badge-info">{{ $project->status_label ?? $project->status ?? '—' }}</span>
+                </td>
+                <td class="label">Responsável Técnico</td>
+                <td class="value">{{ $project->responsavel ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Entidade</td>
+                <td class="value" colspan="3">
+                    {{ $project->institution->razao_social ?? $project->institution->nome_fantasia ?? '—' }}
+                    @if($project->institution && $project->institution->cnpj)
+                        <span class="text-muted"> — CNPJ {{ $project->institution->cnpj }}</span>
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Fonte de Financiamento</td>
+                <td class="value">{{ $project->fundingSource->nome ?? '—' }}</td>
+                <td class="label">Fonte do Projeto</td>
+                <td class="value">{{ $project->fonte ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Parlamentar</td>
+                <td class="value">{{ $project->parlamentar ?? '—' }}</td>
+                <td class="label">Secretaria/Órgão</td>
+                <td class="value">
+                    @if($project->secretaria === 'Outro')
+                        {{ $project->secretaria_outro ?? 'Outro' }}
+                    @else
+                        {{ $project->secretaria ?? '—' }}
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Valor Total</td>
+                <td class="value">
+                    @if($project->valor_total)R$&nbsp;{{ number_format($project->valor_total, 2, ',', '.') }}@else —@endif
+                </td>
+                <td class="label">Valor Recebido</td>
+                <td class="value">
+                    @if($project->valor_recebido)R$&nbsp;{{ number_format($project->valor_recebido, 2, ',', '.') }}@else —@endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Data de Início</td>
+                <td class="value">
+                    @if($project->data_inicio){{ \Carbon\Carbon::parse($project->data_inicio)->format('d/m/Y') }}@else —@endif
+                </td>
+                <td class="label">Data de Término</td>
+                <td class="value">
+                    @if($project->data_fim){{ \Carbon\Carbon::parse($project->data_fim)->format('d/m/Y') }}@else —@endif
+                </td>
+            </tr>
+            @if($project->data_assinatura || $project->nome_presidente)
+            <tr>
+                <td class="label">Data de Assinatura</td>
+                <td class="value">
+                    @if($project->data_assinatura){{ \Carbon\Carbon::parse($project->data_assinatura)->format('d/m/Y') }}@else —@endif
+                </td>
+                <td class="label">Presidente</td>
+                <td class="value">{{ $project->nome_presidente ?? '—' }}</td>
+            </tr>
+            @endif
+        </tbody>
+    </table>
+</div>
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     2. DETALHAMENTO
+═══════════════════════════════════════════════════════════════════ --}}
+<div class="section-title">2. Detalhamento</div>
+
+@if($project->descricao)
+    <div class="subsection-title">Objeto / Descrição</div>
+    <div class="text-block">{{ $project->descricao }}</div>
+@endif
+
+@if($project->objetivo_geral)
+    <div class="subsection-title">Objetivo Geral</div>
+    <div class="text-block">{{ $project->objetivo_geral }}</div>
+@endif
+
+@if($project->specificObjectives && $project->specificObjectives->count())
+    <div class="subsection-title">Objetivos Específicos</div>
+    <table class="striped">
+        <thead><tr><th style="width:8%">#</th><th>Descrição</th></tr></thead>
+        <tbody>
+            @foreach($project->specificObjectives as $obj)
+            <tr>
+                <td>{{ $obj->ordem ?? $loop->iteration }}</td>
+                <td>{{ $obj->descricao ?? $obj->objetivo ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->publico_alvo)
+    <div class="subsection-title">Público-Alvo</div>
+    <div class="text-block">{{ $project->publico_alvo }}</div>
+@endif
+
+@if($project->justificativa)
+    <div class="subsection-title">Justificativa</div>
+    <div class="text-block">{{ $project->justificativa }}</div>
+@endif
+
+@if($project->metodologia)
+    <div class="subsection-title">Metodologia</div>
+    <div class="text-block">{{ $project->metodologia }}</div>
+@endif
+
+@if($project->resultados_esperados)
+    <div class="subsection-title">Resultados Esperados</div>
+    <div class="text-block">{{ $project->resultados_esperados }}</div>
+@endif
+
+@if($project->plano_divulgacao)
+    <div class="subsection-title">Plano de Divulgação</div>
+    <div class="text-block">{{ $project->plano_divulgacao }}</div>
+@endif
+
+@if($project->data_local_horario || $project->quantidade_publico || $project->municipios_alcancados || $project->descricao_servico)
+    <div class="subsection-title">Programação e Público</div>
+    <table class="data-grid">
+        <tbody>
+            @if($project->data_local_horario)
+            <tr>
+                <td class="label">Data, Local e Horário</td>
+                <td class="value">{{ $project->data_local_horario }}</td>
+            </tr>
+            @endif
+            @if($project->quantidade_publico)
+            <tr>
+                <td class="label">Público Estimado</td>
+                <td class="value">{{ number_format($project->quantidade_publico, 0, ',', '.') }} pessoas</td>
+            </tr>
+            @endif
+            @if($project->municipios_alcancados)
+            <tr>
+                <td class="label">Municípios Alcançados</td>
+                <td class="value">{{ $project->municipios_alcancados }}</td>
+            </tr>
+            @endif
+            @if($project->descricao_servico)
+            <tr>
+                <td class="label">Descrição do Serviço</td>
+                <td class="value">{{ $project->descricao_servico }}</td>
+            </tr>
+            @endif
+        </tbody>
+    </table>
+@endif
+
+@if($project->riscos_identificados || $project->plano_mitigacao)
+    <div class="subsection-title">Riscos e Mitigação</div>
+    @if($project->riscos_identificados)
+        <div style="font-size: 10px; font-weight: 600; color: #555; margin-top: 6px;">Riscos Identificados</div>
+        <div class="text-block">{{ $project->riscos_identificados }}</div>
+    @endif
+    @if($project->plano_mitigacao)
+        <div style="font-size: 10px; font-weight: 600; color: #555; margin-top: 6px;">Plano de Mitigação</div>
+        <div class="text-block">{{ $project->plano_mitigacao }}</div>
+    @endif
+@endif
+
+@if($project->funcao_osc || $project->recolhimento_impostos)
+    <div class="subsection-title">Função da OSC e Tributação</div>
+    @if($project->funcao_osc)
+        <div style="font-size: 10px; font-weight: 600; color: #555; margin-top: 6px;">Função da OSC</div>
+        <div class="text-block">{{ $project->funcao_osc }}</div>
+    @endif
+    @if($project->recolhimento_impostos)
+        <div style="font-size: 10px; font-weight: 600; color: #555; margin-top: 6px;">Recolhimento de Impostos</div>
+        <div class="text-block">{{ $project->recolhimento_impostos }}</div>
+    @endif
+@endif
+
+@if($project->outros_patrocinadores || $project->quais_patrocinadores)
+    <div class="subsection-title">Outros Patrocinadores</div>
+    <table class="data-grid">
+        <tbody>
+            <tr>
+                <td class="label">Possui outros patrocinadores</td>
+                <td class="value">{{ $project->outros_patrocinadores ? 'Sim' : 'Não' }}</td>
+            </tr>
+            @if($project->quais_patrocinadores)
+            <tr>
+                <td class="label">Quais</td>
+                <td class="value">{{ $project->quais_patrocinadores }}</td>
+            </tr>
+            @endif
+        </tbody>
+    </table>
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     3. ESTRUTURA E EXECUÇÃO
+═══════════════════════════════════════════════════════════════════ --}}
+@if(
+    ($project->executionLocations && $project->executionLocations->count()) ||
+    ($project->teamMembers && $project->teamMembers->count()) ||
+    ($project->contractedServices && $project->contractedServices->count()) ||
+    $project->capacidade_tecnica
+)
+<div class="section-title">3. Estrutura e Execução</div>
+
+@if($project->executionLocations && $project->executionLocations->count())
+    <div class="subsection-title">Locais de Execução</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Endereço</th>
+                <th style="width:30%">Município</th>
+                <th style="width:10%">UF</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->executionLocations as $loc)
+            <tr>
+                <td>{{ $loc->endereco ?? '—' }}</td>
+                <td>{{ $loc->municipio ?? $loc->cidade ?? '—' }}</td>
+                <td>{{ $loc->uf ?? $loc->estado ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->teamMembers && $project->teamMembers->count())
+    <div class="subsection-title">Equipe</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Função</th>
+                <th style="width:12%">Qtd.</th>
+                <th>Atribuições</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->teamMembers as $m)
+            <tr>
+                <td>{{ $m->funcao ?? $m->nome ?? '—' }}</td>
+                <td>{{ $m->quantidade ?? '—' }}</td>
+                <td>{{ $m->descricao ?? $m->carga_horaria ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->contractedServices && $project->contractedServices->count())
+    <div class="subsection-title">Serviços Contratados</div>
+    @php $totalServicos = 0; @endphp
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Período</th>
+                <th>Pagamento</th>
+                <th class="text-right">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->contractedServices as $sv)
+                @php $totalServicos += (float) $sv->valor; @endphp
+                <tr>
+                    <td>{{ $sv->tipo_contratacao_label ?? $sv->tipo_contratacao ?? '—' }}</td>
+                    <td>{{ $sv->descricao ?? '—' }}</td>
+                    <td>{{ $sv->periodo_execucao ? $sv->periodo_execucao . ' ' . ($sv->unidade_periodo_label ?? $sv->unidade_periodo) : '—' }}</td>
+                    <td>{{ $sv->tipo_pagamento_label ?? $sv->tipo_pagamento ?? '—' }}</td>
+                    <td class="text-right">{{ $sv->valor !== null ? 'R$ ' . number_format($sv->valor, 2, ',', '.') : '—' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right" style="background:#eff6ff;font-weight:bold;">Total</td>
+                <td class="text-right" style="background:#eff6ff;font-weight:bold;">R$&nbsp;{{ number_format($totalServicos, 2, ',', '.') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+@endif
+
+@if($project->capacidade_tecnica)
+    <div class="subsection-title">Capacidade Técnica</div>
+    <div class="text-block">{{ $project->capacidade_tecnica }}</div>
+@endif
+@endif
+
+</body>
+</html>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    @php $reportTitle = $reportTitle ?? 'Relatório do Projeto'; @endphp
+    <title>{{ $reportTitle }} – {{ $project->nome }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #111;
+            background: #fff;
+            padding: 20px 28px 40px;
+        }
+
+        /* ── Cabeçalho ── */
+        .report-header { text-align: center; margin-bottom: 14px; }
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #1e40af;
+        }
+        .report-subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .report-meta {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+        }
+        hr.header-rule {
+            border: none;
+            border-top: 3px solid #dc2626;
+            margin: 10px 0 16px;
+        }
+
+        /* ── Títulos de seção ── */
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 2px solid #1e40af;
+            margin-top: 22px;
+            margin-bottom: 8px;
+            padding: 4px 6px;
+            color: #1e40af;
+            background: #eff6ff;
+        }
+        .subsection-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #111;
+            margin: 12px 0 6px;
+            border-left: 3px solid #dc2626;
+            padding-left: 6px;
+        }
+
+        /* ── Tabelas ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        table th {
+            background: #1e40af;
+            color: #fff;
+            text-align: left;
+            padding: 5px 6px;
+            font-size: 10px;
+            font-weight: 600;
+            border: 1px solid #1e3a8a;
+        }
+        table td {
+            padding: 4px 6px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        table tr:last-child td { border-bottom: none; }
+        table.striped tbody tr:nth-child(even) td { background: #fafafa; }
+
+        /* ── DL de dados ── */
+        .data-grid { width: 100%; border-collapse: collapse; }
+        .data-grid td.label {
+            color: #555;
+            font-weight: 500;
+            width: 28%;
+            padding: 4px 6px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        .data-grid td.value {
+            padding: 4px 6px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: #333;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-danger  { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info    { background: #dbeafe; color: #1e40af; }
+        .badge-primary { background: #dbeafe; color: #1e40af; }
+        .badge-secondary { background: #f1f5f9; color: #334155; }
+
+        /* ── Dot indicators (avaliadores) ── */
+        .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+        .dot-on  { background: #16a34a; }
+        .dot-off { background: #cbd5e1; }
+
+        /* ── Texto longo ── */
+        .text-block {
+            font-size: 10.5px;
+            line-height: 1.6;
+            text-align: left; word-spacing: 0;
+            white-space: pre-wrap;
+            margin-top: 4px;
+        }
+
+        /* ── Status meta ── */
+        .meta-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+        }
+        .meta-box.aprovada { border-left: 4px solid #16a34a; }
+        .meta-box.pendente { border-left: 4px solid #f59e0b; }
+        .meta-box.diligencia { border-left: 4px solid #dc2626; }
+
+        .meta-header {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .meta-num {
+            font-weight: bold;
+            font-size: 12px;
+            color: #1e40af;
+        }
+        .meta-titulo {
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        /* ── Barra de progresso ── */
+        .progress-wrap {
+            width: 100%;
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #1e40af;
+        }
+        .progress-bar.success { background: #16a34a; }
+        .progress-bar.warning { background: #f59e0b; }
+        .progress-bar.danger  { background: #dc2626; }
+
+        /* ── Quebra de página ── */
+        .page-break { page-break-before: always; }
+        .avoid-break { page-break-inside: avoid; }
+
+        /* ── Rodapé ── */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 4px 28px;
+            font-size: 9px;
+            color: #888;
+            border-top: 1px solid #ccc;
+            background: #fff;
+            text-align: center;
+        }
+
+        /* ── Utilitários ── */
+        .text-muted  { color: #666; }
+        .text-center { text-align: center; }
+        .text-right  { text-align: right; }
+        .mt-4 { margin-top: 4px; }
+        .mt-8 { margin-top: 8px; }
+        .mb-0 { margin-bottom: 0; }
+        .no-data { color: #888; font-style: italic; }
+
+        /* ── Imagens (fotos de comprovação) ── */
+        .photo-stack { width: 100%; margin-top: 6px; }
+        .photo-stack .photo-row {
+            padding: 8px 0;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        .photo-stack img {
+            max-width: 100%;
+            max-height: 460px;
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+        }
+        .photo-stack .photo-caption {
+            font-size: 10px;
+            color: #666;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+
+{{-- ─────────────────────────── RODAPÉ FIXO ─────────────────────────── --}}
+<div class="footer">
+    {{ $reportTitle }} gerado em {{ now()->format('d/m/Y H:i') }} | Projeto: {{ $project->nome }}
+</div>
+
+{{-- ─────────────────────────── CABEÇALHO ─────────────────────────── --}}
+<div class="report-header">
+    <div class="report-title">{{ $reportTitle }}</div>
+    <div class="report-subtitle">{{ $project->nome }}</div>
+    @if($project->codigo)
+        <div class="report-meta">Código: {{ $project->codigo }}</div>
+    @endif
+    <div class="report-meta">
+        @if($project->institution)Entidade: {{ $project->institution->razao_social ?? $project->institution->nome_fantasia }} &nbsp;&bull;&nbsp;@endif
+        Gerado em: {{ now()->format('d/m/Y H:i') }}
+    </div>
+</div>
+
+<hr class="header-rule">
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     1. INFORMAÇÕES DO PROJETO
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_informacoes']))
+<div class="section-title">1. Termo de Referência</div>
+
+<div class="avoid-break">
+    <table class="data-grid">
+        <tbody>
+            <tr>
+                <td class="label">Nome</td>
+                <td class="value" colspan="3">{{ $project->nome ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Código</td>
+                <td class="value">{{ $project->codigo ?? '—' }}</td>
+                <td class="label">Status</td>
+                <td class="value">
+                    <span class="badge badge-info">{{ $project->status_label ?? $project->status ?? '—' }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Entidade</td>
+                <td class="value" colspan="3">
+                    {{ $project->institution->razao_social ?? $project->institution->nome_fantasia ?? '—' }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Fonte de Recurso</td>
+                <td class="value" colspan="3">{{ $project->fundingSource->nome ?? $project->fonte ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Parlamentar</td>
+                <td class="value">{{ $project->parlamentar ?? '—' }}</td>
+                <td class="label">Secretaria</td>
+                <td class="value">{{ $project->secretaria ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Valor Total</td>
+                <td class="value">
+                    @if($project->valor_total)
+                        R$&nbsp;{{ number_format($project->valor_total, 2, ',', '.') }}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td class="label">Valor Recebido</td>
+                <td class="value">
+                    @if($project->valor_recebido)
+                        R$&nbsp;{{ number_format($project->valor_recebido, 2, ',', '.') }}
+                    @else
+                        —
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Data Início</td>
+                <td class="value">
+                    @if($project->data_inicio){{ \Carbon\Carbon::parse($project->data_inicio)->format('d/m/Y') }}@else —@endif
+                </td>
+                <td class="label">Data Fim</td>
+                <td class="value">
+                    @if($project->data_fim){{ \Carbon\Carbon::parse($project->data_fim)->format('d/m/Y') }}@else —@endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Responsável</td>
+                <td class="value">{{ $project->responsavel ?? '—' }}</td>
+                <td class="label">Local de Execução</td>
+                <td class="value">{{ $project->local_execucao ?? '—' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@if($project->descricao)
+    <div class="subsection-title">Descrição</div>
+    <div class="text-block">{{ $project->descricao }}</div>
+@endif
+
+@if($project->objetivo_geral)
+    <div class="subsection-title">Objetivo Geral</div>
+    <div class="text-block">{{ $project->objetivo_geral }}</div>
+@endif
+
+@if($project->specificObjectives && $project->specificObjectives->count())
+    <div class="subsection-title">Objetivos Específicos</div>
+    <table class="striped">
+        <thead>
+            <tr><th style="width:8%">#</th><th>Descrição</th></tr>
+        </thead>
+        <tbody>
+            @foreach($project->specificObjectives as $obj)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $obj->objetivo ?? $obj->descricao ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->publico_alvo)
+    <div class="subsection-title">Público-Alvo</div>
+    <div class="text-block">{{ $project->publico_alvo }}</div>
+@endif
+
+@if($project->justificativa)
+    <div class="subsection-title">Justificativa</div>
+    <div class="text-block">{{ $project->justificativa }}</div>
+@endif
+
+@if($project->metodologia)
+    <div class="subsection-title">Metodologia</div>
+    <div class="text-block">{{ $project->metodologia }}</div>
+@endif
+
+@if($project->resultados_esperados)
+    <div class="subsection-title">Resultados Esperados</div>
+    <div class="text-block">{{ $project->resultados_esperados }}</div>
+@endif
+
+@if($project->executionLocations && $project->executionLocations->count())
+    <div class="subsection-title">Locais de Execução</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Município</th>
+                <th style="width:80px;">UF</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->executionLocations as $loc)
+            <tr>
+                <td>{{ $loc->cidade ?? '—' }}</td>
+                <td>{{ $loc->estado ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->teamMembers && $project->teamMembers->count())
+    <div class="subsection-title">Equipe</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Função</th>
+                <th style="width:90px;">Quantidade</th>
+                <th>Atribuições</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->teamMembers as $m)
+            <tr>
+                <td>{{ $m->funcao ?? '—' }}</td>
+                <td>{{ $m->quantidade ?? '—' }}</td>
+                <td>{{ $m->descricao ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     2. DESPESAS
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_despesas']))
+<div class="section-title">2. Despesas</div>
+
+@if($project->expenses && $project->expenses->count())
+    @php
+        $totalExpenses = $project->expenses->sum('valor');
+    @endphp
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Fornecedor</th>
+                <th>Descrição</th>
+                <th>NF</th>
+                <th class="text-right">Valor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->expenses as $exp)
+            <tr>
+                <td>
+                    @if($exp->data_despesa){{ \Carbon\Carbon::parse($exp->data_despesa)->format('d/m/Y') }}@else —@endif
+                </td>
+                <td>{{ $exp->categoria ?? '—' }}</td>
+                <td>{{ $exp->fornecedor ?? '—' }}</td>
+                <td>{{ $exp->descricao ?? '—' }}</td>
+                <td>{{ $exp->numero_nf ?? '—' }}</td>
+                <td class="text-right">
+                    @if($exp->valor)
+                        R$&nbsp;{{ number_format($exp->valor, 2, ',', '.') }}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td>
+                    @php
+                        $expBadge = match($exp->status) {
+                            'PAGO' => 'badge-success',
+                            'APROVADO' => 'badge-info',
+                            'REJEITADO' => 'badge-danger',
+                            default => 'badge-warning',
+                        };
+                    @endphp
+                    <span class="badge {{ $expBadge }}">{{ $exp->status_label ?? $exp->status ?? '—' }}</span>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5" class="text-right" style="background:#eff6ff;font-weight:bold;">Total</td>
+                <td class="text-right" style="background:#eff6ff;font-weight:bold;">R$&nbsp;{{ number_format($totalExpenses, 2, ',', '.') }}</td>
+                <td style="background:#eff6ff;"></td>
+            </tr>
+        </tfoot>
+    </table>
+@else
+    <p class="no-data">Nenhuma despesa registrada.</p>
+@endif
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     3. METAS
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_metas']))
+<div class="section-title">3. Metas</div>
+
+@if($project->goals && $project->goals->count())
+    @foreach($project->goals as $goal)
+        <div class="meta-box avoid-break">
+            <div class="meta-header">
+                <span class="meta-num">Meta {{ $goal->numero ?? $loop->iteration }}</span>
+                <span class="meta-titulo">{{ $goal->titulo ?? '—' }}</span>
+            </div>
+            <table class="data-grid">
+                <tbody>
+                    <tr>
+                        <td class="label">Tipo</td>
+                        <td class="value">{{ $goal->tipo_meta ?? '—' }}</td>
+                        <td class="label">Status</td>
+                        <td class="value">
+                            <span class="badge badge-{{ $goal->status_color ?? 'secondary' }}">{{ $goal->status_label ?? '—' }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">Indicador</td>
+                        <td class="value" colspan="3">{{ $goal->indicador ?? '—' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Quantidade Prevista</td>
+                        <td class="value">{{ $goal->quantidade_prevista ?? '—' }} {{ $goal->unidade_medida ?? '' }}</td>
+                        <td class="label">Realizada</td>
+                        <td class="value">{{ $goal->quantidade_realizada ?? '—' }} {{ $goal->unidade_medida ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Data Início</td>
+                        <td class="value">
+                            @if($goal->data_inicio){{ \Carbon\Carbon::parse($goal->data_inicio)->format('d/m/Y') }}@else —@endif
+                        </td>
+                        <td class="label">Prazo</td>
+                        <td class="value">
+                            @if($goal->prazo){{ \Carbon\Carbon::parse($goal->prazo)->format('d/m/Y') }}@else —@endif
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">Responsável</td>
+                        <td class="value" colspan="3">{{ $goal->responsavel ?? '—' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            @if($goal->descricao)
+                <div class="text-block" style="margin-top:6px;"><strong>Descrição:</strong> {{ $goal->descricao }}</div>
+            @endif
+
+            @if($goal->activities && $goal->activities->count())
+                <div class="subsection-title" style="margin-top:8px;">Atividades</div>
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Início</th>
+                            <th>Fim</th>
+                            <th>Responsável</th>
+                            <th>%</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($goal->activities as $atv)
+                        <tr>
+                            <td>{{ $atv->nome ?? '—' }}</td>
+                            <td>@if($atv->data_inicio){{ \Carbon\Carbon::parse($atv->data_inicio)->format('d/m/Y') }}@else —@endif</td>
+                            <td>@if($atv->data_fim){{ \Carbon\Carbon::parse($atv->data_fim)->format('d/m/Y') }}@else —@endif</td>
+                            <td>{{ $atv->responsavel ?? '—' }}</td>
+                            <td>{{ $atv->percentual_execucao ?? 0 }}%</td>
+                            <td>{{ $atv->status ?? '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    @endforeach
+@else
+    <p class="no-data">Nenhuma meta cadastrada.</p>
+@endif
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     4. COMPROVAÇÃO
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_comprovacao']))
+<div class="section-title">4. Comprovação</div>
+
+@if($project->goals && $project->goals->count())
+    @foreach($project->goals as $goal)
+        @php $proof = $goal->proof; @endphp
+        <div class="meta-box avoid-break">
+            <div class="meta-header">
+                <span class="meta-num">Meta {{ $goal->numero ?? $loop->iteration }}</span>
+                <span class="meta-titulo">{{ $goal->titulo ?? '—' }}</span>
+                @if($proof && $proof->isComplete())
+                    <span class="badge badge-success" style="float:right;">Completa</span>
+                @else
+                    <span class="badge badge-warning" style="float:right;">Pendente</span>
+                @endif
+            </div>
+
+            @if($proof)
+                <table class="data-grid">
+                    <tbody>
+                        <tr>
+                            <td class="label">Descrição</td>
+                            <td class="value">{{ $proof->descricao ?? '—' }}</td>
+                        </tr>
+                        @if($proof->link_video)
+                        <tr>
+                            <td class="label">Link Vídeo</td>
+                            <td class="value">{{ $proof->link_video }}</td>
+                        </tr>
+                        @endif
+                        @if($proof->anexo_nome)
+                        <tr>
+                            <td class="label">Anexo</td>
+                            <td class="value">{{ $proof->anexo_nome }}</td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+
+                @php $fotos = $proof->fotos ?? []; @endphp
+                @if(count($fotos))
+                    <div class="subsection-title" style="margin-top:8px;">Fotos ({{ count($fotos) }}/5)</div>
+                    <div class="photo-stack">
+                        @foreach($fotos as $idx => $foto)
+                            @php
+                                $absPath = storage_path('app/public/'.$foto);
+                                $imgSrc = null;
+                                if (file_exists($absPath) && is_readable($absPath)) {
+                                    $mime = function_exists('mime_content_type') ? @mime_content_type($absPath) : 'image/jpeg';
+                                    if (!$mime) { $mime = 'image/jpeg'; }
+                                    $imgSrc = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($absPath));
+                                }
+                            @endphp
+                            <div class="photo-row">
+                                @if($imgSrc)
+                                    <img src="{{ $imgSrc }}" alt="Foto {{ $idx + 1 }}">
+                                    <div class="photo-caption">Foto {{ $idx + 1 }} de {{ count($fotos) }}</div>
+                                @else
+                                    <span class="no-data">Imagem não encontrada</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            @else
+                <p class="no-data">Sem comprovação registrada.</p>
+            @endif
+        </div>
+    @endforeach
+@else
+    <p class="no-data">Nenhuma meta para comprovar.</p>
+@endif
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     5. DILIGÊNCIAS / APROVAÇÕES
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_diligencias']))
+<div class="section-title">5. Diligências e Aprovações</div>
+
+@if($project->goals && $project->goals->count())
+    @foreach($project->goals as $goal)
+        @php
+            $approvals = $goal->approvals;
+            $approvedNumbers = $approvals->where('aprovado', true)->pluck('avaliador_numero')->toArray();
+        @endphp
+        <div class="meta-box avoid-break">
+            <div class="meta-header">
+                <span class="meta-num">Meta {{ $goal->numero ?? $loop->iteration }}</span>
+                <span class="meta-titulo">{{ $goal->titulo ?? '—' }}</span>
+                <span class="badge badge-info" style="float:right;">{{ $goal->approvedCount() }}/5 Aprovações</span>
+            </div>
+
+            <div style="margin-top:6px;">
+                @for($i = 1; $i <= 5; $i++)
+                    @php $isApproved = in_array($i, $approvedNumbers); @endphp
+                    <span style="display:inline-block;margin-right:14px;font-size:10.5px;">
+                        <span class="dot {{ $isApproved ? 'dot-on' : 'dot-off' }}"></span>
+                        Avaliador {{ $i }}
+                        @php $appr = $approvals->firstWhere('avaliador_numero', $i); @endphp
+                        @if($appr && $appr->avaliador_nome)
+                            <span class="text-muted">({{ $appr->avaliador_nome }})</span>
+                        @endif
+                    </span>
+                @endfor
+            </div>
+
+            @if($approvals->count())
+                <table class="striped" style="margin-top:6px;">
+                    <thead>
+                        <tr>
+                            <th style="width:8%">#</th>
+                            <th>Avaliador</th>
+                            <th>Data</th>
+                            <th>Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($approvals as $appr)
+                            <tr>
+                                <td>{{ $appr->avaliador_numero }}</td>
+                                <td>{{ $appr->avaliador_nome ?? '—' }}</td>
+                                <td>
+                                    @if($appr->aprovado_em)
+                                        {{ \Carbon\Carbon::parse($appr->aprovado_em)->format('d/m/Y H:i') }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td>{{ $appr->observacoes ?? '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    @endforeach
+@endif
+
+@if($project->diligences && $project->diligences->count())
+    <div class="subsection-title">Diligências Registradas</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Meta</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Responsável</th>
+                <th>Prazo</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->diligences as $dil)
+            <tr>
+                <td>{{ $dil->goal?->numero ?? '—' }}</td>
+                <td>{{ $dil->tipo ?? '—' }}</td>
+                <td>{{ $dil->descricao ?? '—' }}</td>
+                <td>{{ $dil->responsavel ?? '—' }}</td>
+                <td>
+                    @if($dil->prazo){{ \Carbon\Carbon::parse($dil->prazo)->format('d/m/Y') }}@else —@endif
+                </td>
+                <td>
+                    <span class="badge badge-info">{{ $dil->status_label ?? $dil->status ?? '—' }}</span>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     6. PRESTAÇÃO DE CONTAS
+     ═══════════════════════════════════════════════════════════════════ --}}
+@if(!empty($sections['inc_prestacao_contas']))
+<div class="section-title">6. Prestação de Contas</div>
+
+@if($project->goals && $project->goals->count())
+    <div class="subsection-title">Status de Conformidade por Meta</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th style="width:8%">#</th>
+                <th style="width:42%">Meta</th>
+                <th style="width:25%">Status</th>
+                <th style="width:25%">Progresso</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->goals as $goal)
+                @php
+                    $cs = $goal->complianceStatus();
+                    $boxClass = match($cs['color']) {
+                        'success' => 'aprovada',
+                        'warning' => 'pendente',
+                        'info'    => 'diligencia',
+                        default   => 'pendente',
+                    };
+                    $barClass = match($cs['color']) {
+                        'success' => 'success',
+                        'warning' => 'warning',
+                        'info'    => 'danger',
+                        default   => '',
+                    };
+                @endphp
+                <tr>
+                    <td>{{ $goal->numero ?? $loop->iteration }}</td>
+                    <td>{{ $goal->titulo ?? '—' }}</td>
+                    <td>
+                        <span class="badge badge-{{ $cs['color'] }}">{{ $cs['label'] }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ $cs['percent'] }}%</strong>
+                        <div class="progress-wrap">
+                            <div class="progress-bar {{ $barClass }}" style="width: {{ $cs['percent'] }}%"></div>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endif
+
+@if($project->accountingReports && $project->accountingReports->count())
+    <div class="subsection-title">Relatórios de Prestação</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Data Envio</th>
+                <th>Data Aprovação</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($project->accountingReports as $rel)
+            <tr>
+                <td>
+                    <span class="badge badge-info">{{ $rel->status_label ?? $rel->status ?? '—' }}</span>
+                </td>
+                <td>@if($rel->data_envio){{ \Carbon\Carbon::parse($rel->data_envio)->format('d/m/Y') }}@else —@endif</td>
+                <td>@if($rel->data_aprovacao){{ \Carbon\Carbon::parse($rel->data_aprovacao)->format('d/m/Y') }}@else —@endif</td>
+                <td>{{ $rel->observacoes ?? '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@elseif(!($project->goals && $project->goals->count()))
+    <p class="no-data">Nenhum relatório de prestação registrado.</p>
+@endif
+@endif
+
+</body>
+</html>

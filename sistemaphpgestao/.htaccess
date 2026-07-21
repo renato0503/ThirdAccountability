@@ -1,0 +1,25 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sistemaphpgestao/
+
+    # Força HTTPS (compatível com proxy de hospedagem compartilhada)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Storage público (uploads de usuário) — servir de public/storage ANTES do bloqueio
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+
+    # Bloquear acesso direto a diretórios sensíveis
+    RewriteRule ^(vendor|app|config|database|routes|bootstrap|lang|tests)(\/|$) - [F,L]
+    # Bloquear acesso ao storage interno do Laravel (logs, framework, etc.)
+    RewriteRule ^storage/(framework|app|logs)(\/|$) - [F,L]
+
+    # Assets estáticos (css, js, img, fonts) — serve direto de /public
+    RewriteRule ^(css|js|img|fonts|favicon\.ico)(.*)?$ public/$1$2 [L]
+
+    # Todo o resto passa pelo index.php da raiz
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>

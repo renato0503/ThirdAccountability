@@ -1,0 +1,36 @@
+# Ignore everything in sistemaphpgestao/lixo/
+sistemaphpgestao/lixo/
+
+# Laravel vendor
+sistemaphpgestao/vendor/
+
+# Node
+sistemaphpgestao/node_modules/
+sistemaphpgestao/public/build/
+
+# Environment
+sistemaphpgestao/.env
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude AI — contém credenciais FTP/SSH
+sistemaphpgestao/.claude/
+
+# Laravel cache — contém paths reais do servidor
+sistemaphpgestao/storage/framework/views/
+sistemaphpgestao/storage/framework/cache/
+sistemaphpgestao/storage/logs/
+
+# Arquivos de diagnostico com credenciais
+sistemaphpgestao/error_log
+sistemaphpgestao/config/error_log
+sistemaphpgestao/*.tar.gz

@@ -1,0 +1,352 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\{Project, Institution, FundingSource, ProjectExecutionLocation, ProjectSpecificObjective, ProjectTeamMember, ProjectContractedService, ProjectCapabilityPhoto, AuditLog};
+use App\Http\Controllers\Concerns\NormalizesBrlNumbers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+class ProjectController extends Controller {
+    use NormalizesBrlNumbers;
+
+
+    private array $statuses = [
+        'RASCUNHO','EM_ANALISE','APROVADO','EM_EXECUCAO',
+        'SUSPENSO','FINALIZADO','PRESTACAO_CONTAS','PRESTACAO_APROVADA','PRESTACAO_REPROVADA',
+    ];
+
+    private array $fontes = [
+        'Emenda Federal','Emenda Estadual','Emenda Municipal','Recurso Próprio',
+        'Convênio','Termo de Fomento','Termo de Colaboração','Doação','Patrocínio','Outro',
+    ];
+
+    private array $secretariasEstaduais = [
+        'SECITECI – Secretaria de Estado de Ciência, Tecnologia e Inovação',
+        'SECOM – Secretaria de Estado de Comunicação',
+        'SES-MT – Secretaria de Estado de Saúde',
+        'SEDUC-MT – Secretaria de Estado de Educação',
+        'SESP-MT – Secretaria de Estado de Segurança Pública',
+        'SEAF – Secretaria de Estado de Agricultura Familiar',
+        'SINFRA-MT – Secretaria de Estado de Infraestrutura e Logística',
+        'SEDEC-MT – Secretaria de Estado de Desenvolvimento Econômico',
+        'SEPLAG-MT – Secretaria de Estado de Planejamento e Gestão',
+        'SECEL-MT – Secretaria de Estado de Cultura, Esporte e Lazer',
+        'SEMA-MT – Secretaria de Estado de Meio Ambiente',
+        'SETASC – Secretaria de Estado de Assistência Social e Cidadania',
+    ];
+
+    private array $secretariasMunicipais = [
+        'Secretaria Municipal de Educação',
+        'Secretaria Municipal de Saúde',
+        'Secretaria Municipal de Cultura',
+        'Secretaria Municipal de Assistência Social',
+        'Secretaria Municipal de Esporte e Lazer',
+        'Secretaria Municipal de Meio Ambiente',
+        'Secretaria Municipal de Agricultura',
+        'Secretaria Municipal de Desenvolvimento Econômico',
+        'Secretaria Municipal de Infraestrutura',
+        'Secretaria Municipal de Mobilidade Urbana',
+        'Secretaria Municipal de Cidadania e Direitos Humanos',
+        'Secretaria Municipal da Juventude',
+    ];
+
+    public function index(Request $req) {
+        $user = Auth::user();
+        $q = Project::with(['institution','fundingSource'])->withCount(['goals','expenses','documents']);
+        if (!$user->isAdmin() && $user->institution_id) {
+            $q->where('institution_id',$user->institution_id);
+        }
+        if ($s = $req->search) {
+            $q->where(fn($x) => $x->where('nome','like',"%$s%")->orWhere('codigo','like',"%$s%"));
+        }
+        if ($status = $req->status) $q->where('status',$status);
+        if ($instId = $req->institution_id) $q->where('institution_id',$instId);
+
+        $projects     = $q->orderBy('updated_at','desc')->paginate(15)->withQueryString();
+        $institutions = $user->isAdmin() ? Institution::where('active',true)->orderBy('razao_social')->get() : collect();
+        $statuses     = $this->statuses;
+        return view('projects.index', compact('projects','institutions','statuses'));
+    }
+
+    public function create() {
+        $user         = Auth::user();
+        if (!$user->canEdit()) abort(403);
+        $institutions = $user->isAdmin()
+            ? Institution::where('active',true)->orderBy('razao_social')->get()
+            : Institution::where('id',$user->institution_id)->get();
+        $fundingSources = FundingSource::orderBy('nome')->get();
+        $statuses    = ['RASCUNHO','EM_ANALISE','APROVADO','EM_EXECUCAO','SUSPENSO','FINALIZADO'];
+        $fontes                = $this->fontes;
+        $secretariasEstaduais  = $this->secretariasEstaduais;
+        $secretariasMunicipais = $this->secretariasMunicipais;
+        $currentYear = (int) date('Y');
+        $anos        = range($currentYear - 2, $currentYear + 2);
+        return view('projects.create', compact('institutions','fundingSources','statuses','fontes','secretariasEstaduais','secretariasMunicipais','anos','currentYear'));
+    }
+
+    public function store(Request $req) {
+        if (!Auth::user()->canEdit()) abort(403);
+        $this->normalizeBrl($req, ['valor_total', 'valor_recebido', 'contracted_services.*.valor']);
+        $data = $req->validate($this->validationRules());
+
+        if ($req->boolean('gerar_codigo')) {
+            $year = $req->input('ano_codigo', date('Y'));
+            $data['codigo'] = $this->generateCode($year);
+        }
+
+        $locations  = $data['locations']  ?? [];
+        $objectives = $data['objectives'] ?? [];
+        $teamMembers = $data['team_members'] ?? [];
+        $contractedServices = $data['contracted_services'] ?? [];
+
+        unset($data['locations'], $data['objectives'], $data['gerar_codigo'], $data['ano_codigo'],
+              $data['team_members'], $data['contracted_services'],
+              $data['capability_photos'], $data['capability_legendas'], $data['assinatura_image']);
+
+        if ($req->hasFile('assinatura_image')) {
+            $data['assinatura_path'] = $req->file('assinatura_image')->store('signatures', 'public');
+        }
+
+        $data['outros_patrocinadores'] = $req->boolean('outros_patrocinadores');
+
+        $project = Project::create($data);
+
+        $this->syncRelated($project, $req, $locations, $objectives, $teamMembers, $contractedServices);
+
+        AuditLog::create(['user_id'=>Auth::id(),'acao'=>'CREATE','entidade'=>'Project','entidade_id'=>$project->id,'dados'=>json_encode(['nome'=>$project->nome])]);
+        return redirect()->route('projetos.show',['projeto'=>$project])->with('success','Projeto criado com sucesso!');
+    }
+
+    public function show(Project $projeto) {
+        $projeto->load([
+            'institution','fundingSource',
+            'goals.activities','goals.proof','goals.approvals',
+            'expenses','documents','diligences.goal',
+            'accountingReports','budgetItems',
+            'executionLocations','specificObjectives',
+            'teamMembers','contractedServices','capabilityPhotos',
+            'priceResearches','reportSelection','notifications',
+        ]);
+        return view('projects.show', ['project'=>$projeto]);
+    }
+
+    public function edit(Project $projeto) {
+        $user           = Auth::user();
+        if (!$user->canEdit()) abort(403);
+        $institutions   = $user->isAdmin()
+            ? Institution::where('active',true)->orderBy('razao_social')->get()
+            : Institution::where('id',$user->institution_id)->get();
+        $fundingSources = FundingSource::orderBy('nome')->get();
+        $statuses              = $this->statuses;
+        $fontes                = $this->fontes;
+        $secretariasEstaduais  = $this->secretariasEstaduais;
+        $secretariasMunicipais = $this->secretariasMunicipais;
+        $projeto->load(['executionLocations','specificObjectives','teamMembers','contractedServices','capabilityPhotos']);
+        return view('projects.edit', compact('fontes','secretariasEstaduais','secretariasMunicipais') + ['project'=>$projeto,'institutions'=>$institutions,'fundingSources'=>$fundingSources,'statuses'=>$statuses]);
+    }
+
+    public function update(Request $req, Project $projeto) {
+        if (!Auth::user()->canEdit()) abort(403);
+        $this->normalizeBrl($req, ['valor_total', 'valor_recebido', 'contracted_services.*.valor']);
+        $data = $req->validate($this->validationRules(false));
+
+        $locations  = $data['locations']  ?? [];
+        $objectives = $data['objectives'] ?? [];
+        $teamMembers = $data['team_members'] ?? [];
+        $contractedServices = $data['contracted_services'] ?? [];
+
+        unset($data['locations'], $data['objectives'],
+              $data['team_members'], $data['contracted_services'],
+              $data['capability_photos'], $data['capability_legendas'], $data['assinatura_image']);
+
+        if ($req->hasFile('assinatura_image')) {
+            if ($projeto->assinatura_path) {
+                Storage::disk('public')->delete($projeto->assinatura_path);
+            }
+            $data['assinatura_path'] = $req->file('assinatura_image')->store('signatures', 'public');
+        }
+
+        $data['outros_patrocinadores'] = $req->boolean('outros_patrocinadores');
+
+        $projeto->update($data);
+
+        $projeto->executionLocations()->delete();
+        $projeto->specificObjectives()->delete();
+        $projeto->teamMembers()->delete();
+        $projeto->contractedServices()->delete();
+
+        $this->syncRelated($projeto, $req, $locations, $objectives, $teamMembers, $contractedServices);
+
+        AuditLog::create(['user_id'=>Auth::id(),'acao'=>'UPDATE','entidade'=>'Project','entidade_id'=>$projeto->id]);
+        return redirect()->route('projetos.show',['projeto'=>$projeto])->with('success','Projeto atualizado!');
+    }
+
+    public function destroy(Project $projeto) {
+        if (!Auth::user()->isAdmin()) abort(403);
+        AuditLog::create(['user_id'=>Auth::id(),'acao'=>'DELETE','entidade'=>'Project','entidade_id'=>$projeto->id]);
+        $projeto->delete();
+        return redirect()->route('projetos.index')->with('success','Projeto excluído.');
+    }
+
+    private function validationRules(bool $isStore = true): array {
+        return [
+            'nome'                  => 'required|string|max:255',
+            'codigo'                => 'nullable|string',
+            'numero_proposta'       => 'nullable|string|max:100',
+            'gerar_codigo'          => 'nullable|boolean',
+            'ano_codigo'            => 'nullable|integer',
+            'institution_id'        => 'required|exists:institutions,id',
+            'funding_source_id'     => 'nullable|exists:funding_sources,id',
+            'fonte'                 => 'nullable|string',
+            'parlamentar'           => 'nullable|string',
+            'secretaria'            => 'nullable|string',
+            'secretaria_outro'      => 'nullable|string',
+            'descricao'             => 'nullable|string',
+            'objetivo_geral'        => 'nullable|string',
+            'objetivos_especificos' => 'nullable|string',
+            'publico_alvo'          => 'nullable|string',
+            'justificativa'         => 'nullable|string',
+            'metodologia'           => 'nullable|string',
+            'capacidade_tecnica'    => 'nullable|string',
+            'municipios_alcancados' => 'nullable|string',
+            'quantidade_publico'    => 'nullable|integer|min:0',
+            'data_local_horario'    => 'nullable|string',
+            'descricao_servico'     => 'nullable|string',
+            'funcao_osc'            => 'nullable|string',
+            'recolhimento_impostos' => 'nullable|string',
+            'riscos_identificados'  => 'nullable|string',
+            'plano_mitigacao'       => 'nullable|string',
+            'resultados_esperados'  => 'nullable|string',
+            'plano_divulgacao'      => 'nullable|string',
+            'outros_patrocinadores' => 'nullable|boolean',
+            'quais_patrocinadores'  => 'nullable|string',
+            'data_assinatura'       => 'nullable|date',
+            'nome_presidente'       => 'nullable|string|max:255',
+            'assinatura_image'      => 'nullable|image|max:4096',
+            'valor_total'           => 'nullable|numeric',
+            'valor_recebido'        => 'nullable|numeric',
+            'data_inicio'           => 'nullable|date',
+            'data_fim'              => 'nullable|date',
+            'status'                => 'required|string',
+            'responsavel'           => 'nullable|string',
+            'local_execucao'        => 'nullable|string',
+            'locations'             => 'nullable|array',
+            'locations.*.cidade'    => 'required_with:locations|string',
+            'locations.*.estado'    => 'nullable|string|max:2',
+            'objectives'            => 'nullable|array',
+            'objectives.*'          => 'nullable|string',
+            'team_members'                  => 'nullable|array',
+            'team_members.*.funcao'         => 'nullable|string|max:255',
+            'team_members.*.quantidade'     => 'nullable|integer|min:1',
+            'team_members.*.descricao'      => 'nullable|string',
+            'contracted_services'                       => 'nullable|array',
+            'contracted_services.*.tipo_contratacao'    => 'nullable|in:PF,PJ',
+            'contracted_services.*.descricao'           => 'nullable|string',
+            'contracted_services.*.periodo_execucao'    => 'nullable|integer|min:0',
+            'contracted_services.*.unidade_periodo'     => 'nullable|in:dia,semana,mes,ano',
+            'contracted_services.*.tipo_pagamento'      => 'nullable|in:mensal,unico',
+            'contracted_services.*.valor'               => 'nullable|numeric|min:0',
+            'capability_photos'     => 'nullable|array|max:5',
+            'capability_photos.*'   => 'nullable|image|max:4096',
+            'capability_legendas'   => 'nullable|array',
+            'capability_legendas.*' => 'nullable|string|max:255',
+        ];
+    }
+
+    private function syncRelated(Project $project, Request $req, array $locations, array $objectives, array $teamMembers, array $contractedServices): void {
+        foreach ($locations as $loc) {
+            if (!empty($loc['cidade'])) {
+                $project->executionLocations()->create($loc);
+            }
+        }
+        $ordem = 0;
+        foreach ($objectives as $obj) {
+            if (!empty($obj)) {
+                $project->specificObjectives()->create(['objetivo'=>$obj,'ordem'=>$ordem++]);
+            }
+        }
+        $ordem = 0;
+        foreach ($teamMembers as $member) {
+            if (!empty($member['funcao'])) {
+                $project->teamMembers()->create([
+                    'funcao'     => $member['funcao'],
+                    'quantidade' => (int)($member['quantidade'] ?? 1),
+                    'descricao'  => $member['descricao'] ?? null,
+                    'ordem'      => $ordem++,
+                ]);
+            }
+        }
+        $ordem = 0;
+        foreach ($contractedServices as $svc) {
+            if (!empty($svc['descricao'])) {
+                $project->contractedServices()->create([
+                    'tipo_contratacao' => $svc['tipo_contratacao'] ?? 'PF',
+                    'descricao'        => $svc['descricao'],
+                    'periodo_execucao' => isset($svc['periodo_execucao']) && $svc['periodo_execucao'] !== '' ? (int)$svc['periodo_execucao'] : null,
+                    'unidade_periodo'  => $svc['unidade_periodo'] ?? 'mes',
+                    'tipo_pagamento'   => $svc['tipo_pagamento'] ?? 'unico',
+                    'valor'            => isset($svc['valor']) && $svc['valor'] !== '' ? (float)$svc['valor'] : null,
+                    'ordem'            => $ordem++,
+                ]);
+            }
+        }
+
+        if ($req->hasFile('capability_photos')) {
+            $legendas = $req->input('capability_legendas', []);
+            $existing = $project->capabilityPhotos()->count();
+            foreach ($req->file('capability_photos') as $i => $photo) {
+                if ($existing + $i >= 5) break;
+                $path = $photo->store('capability_photos', 'public');
+                $project->capabilityPhotos()->create([
+                    'file_path' => $path,
+                    'legenda'   => $legendas[$i] ?? null,
+                    'ordem'     => $existing + $i,
+                ]);
+            }
+        }
+    }
+
+    public function deleteCapabilityPhoto(Project $projeto, ProjectCapabilityPhoto $foto) {
+        if ($foto->project_id !== $projeto->id) abort(404);
+        if ($foto->file_path) {
+            Storage::disk('public')->delete($foto->file_path);
+        }
+        $foto->delete();
+        return back()->with('success', 'Foto removida.');
+    }
+
+    private function generateCode(int $year): string {
+        $last = Project::where('codigo','like',"%/$year")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(codigo, '/', 1) AS UNSIGNED) DESC")
+            ->value('codigo');
+        $seq = $last ? ((int) explode('/',$last)[0]) + 1 : 1;
+        return str_pad($seq,3,'0',STR_PAD_LEFT)."/$year";
+    }
+
+    public function exportInventoryPdf(Project $projeto) {
+        $user = Auth::user();
+        if (!$user->isAdmin() && $user->institution_id !== $projeto->institution_id) abort(403);
+
+        $projeto->load([
+            'institution','fundingSource',
+            'executionLocations','specificObjectives',
+            'teamMembers','contractedServices','capabilityPhotos',
+        ]);
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'acao'       => 'EXPORT',
+            'entidade'   => 'Project',
+            'entidade_id'=> $projeto->id,
+            'dados'      => json_encode(['tipo'=>'inventario']),
+        ]);
+
+        $pdf = Pdf::loadView('pdf.project-inventory', ['project' => $projeto])
+                  ->setPaper('a4','portrait');
+
+        $codigo = preg_replace('/[^A-Za-z0-9-]/', '_', $projeto->codigo ?? $projeto->id);
+        return $pdf->download("inventario-projeto-{$codigo}-".now()->format('YmdHis').'.pdf');
+    }
+}

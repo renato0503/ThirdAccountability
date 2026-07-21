@@ -1,0 +1,1272 @@
+@extends('layouts.app')
+@section('content')
+
+@php
+    $colors = [
+        'EM_EXECUCAO'        => 'success',
+        'APROVADO'           => 'primary',
+        'FINALIZADO'         => 'secondary',
+        'SUSPENSO'           => 'danger',
+        'EM_ANALISE'         => 'warning',
+        'RASCUNHO'           => 'secondary',
+        'PRESTACAO_CONTAS'   => 'info',
+        'PRESTACAO_APROVADA' => 'success',
+        'PRESTACAO_REPROVADA'=> 'danger',
+        'CONCLUIDO'          => 'success',
+        'CANCELADO'          => 'danger',
+    ];
+    $metasAprovadas = $project->goals->filter(fn($g) => $g->fullyApproved())->count();
+    $totalMetas     = $project->goals->count();
+
+    // Aba inicial selecionável via query string ?tab=...
+    $tabsValid = ['info','despesas','metas','comprovacao','diligencias','prestacao','relatorio','compliance'];
+    $activeTab = in_array(request('tab'), $tabsValid, true) ? request('tab') : 'info';
+
+    $sel = $project->reportSelection;
+    $relSel = [
+        'inc_informacoes'      => $sel->inc_informacoes      ?? true,
+        'inc_despesas'         => $sel->inc_despesas         ?? true,
+        'inc_metas'            => $sel->inc_metas            ?? true,
+        'inc_comprovacao'      => $sel->inc_comprovacao      ?? true,
+        'inc_diligencias'      => $sel->inc_diligencias      ?? true,
+        'inc_prestacao_contas' => $sel->inc_prestacao_contas ?? true,
+    ];
+
+    $compSel = $project->complianceSelection;
+    $compliance = [
+        'inc_informacoes'      => $compSel->inc_informacoes      ?? true,
+        'inc_despesas'         => $compSel->inc_despesas         ?? false,
+        'inc_metas'            => $compSel->inc_metas            ?? false,
+        'inc_comprovacao'      => $compSel->inc_comprovacao      ?? false,
+        'inc_diligencias'      => $compSel->inc_diligencias      ?? false,
+        'inc_prestacao_contas' => $compSel->inc_prestacao_contas ?? false,
+    ];
+@endphp
+
+<div class="d-flex align-items-start justify-content-between mb-4">
+    <div>
+        <h1 style="font-size: 20px; font-weight: 700; margin: 0;">{{ $project->nome }}</h1>
+        <div class="d-flex align-items-center gap-2 mt-1">
+            @if($project->codigo)
+                <span style="font-size: 13px; color: var(--text-muted); font-family: monospace;">{{ $project->codigo }}</span>
+            @endif
+            <span class="badge bg-{{ $colors[$project->status] ?? 'secondary' }}">{{ $project->status_label }}</span>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ route('projetos.inventario-pdf', ['projeto' => $project]) }}" class="btn btn-outline-secondary" data-turbo="false" title="Exportar identificação e detalhamento do projeto (para envio ao governo)">
+            <i class="bi bi-file-earmark-text"></i> Inventário
+        </a>
+        <a href="{{ route('projetos.relatorio.pdf', ['projeto' => $project, 'inc_informacoes' => 1, 'inc_despesas' => 0, 'inc_metas' => 0, 'inc_comprovacao' => 0, 'inc_diligencias' => 0, 'inc_prestacao_contas' => 0]) }}" class="btn btn-outline-secondary" data-turbo="false" title="Exportar somente o Termo de Referência">
+            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+        </a>
+        <a href="{{ route('projetos.edit', ['projeto' => $project]) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{{ route('projetos.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+{{-- Resumo Financeiro --}}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Valor Total</div>
+            <div class="stat-value" style="font-size: 20px;">R$ {{ number_format($project->valor_total, 2, ',', '.') }}</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Valor Executado</div>
+            <div class="stat-value" style="font-size: 20px; color: #d97706;">R$ {{ number_format($project->valor_executado, 2, ',', '.') }}</div>
+        </div>
+    </div>
+    @if($metasAprovadas > 0)
+    <div class="col-sm-6 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Metas Aprovadas</div>
+            <div class="stat-value" style="font-size: 20px; color: #16a34a;">{{ $metasAprovadas }}/{{ $totalMetas }}</div>
+        </div>
+    </div>
+    @endif
+</div>
+
+{{-- Tabs --}}
+<ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'info' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-info">
+            <i class="bi bi-info-circle me-1"></i> Termo de Referência
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'despesas' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-despesas">
+            <i class="bi bi-receipt me-1"></i> Despesas
+            <span class="badge bg-secondary ms-1" style="font-size: 11px;">{{ $project->expenses->count() }}</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'metas' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-metas">
+            <i class="bi bi-bullseye me-1"></i> Metas
+            <span class="badge bg-secondary ms-1" style="font-size: 11px;">{{ $totalMetas }}</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'comprovacao' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-comprovacao">
+            <i class="bi bi-camera me-1"></i> Comprovação
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'diligencias' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-diligencias">
+            <i class="bi bi-clipboard-check me-1"></i> Diligências
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'prestacao' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-prestacao">
+            <i class="bi bi-file-earmark-ruled me-1"></i> Prestação de Contas
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'relatorio' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-relatorio">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Relatório
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {{ $activeTab === 'compliance' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-compliance">
+            <i class="bi bi-shield-check me-1"></i> Compliance
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 1: Informações
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'info' ? 'show active' : '' }}" id="tab-info">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Detalhes do Projeto</div>
+                    <div class="card-body">
+                        <dl class="row mb-0" style="font-size: 13.5px; row-gap: 8px;">
+                            @if($project->numero_proposta)
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Nº Proposta</dt>
+                            <dd class="col-7 mb-0" style="font-family: monospace;">{{ $project->numero_proposta }}</dd>
+                            @endif
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Instituição</dt>
+                            <dd class="col-7 mb-0">{{ $project->institution?->razao_social ?? '—' }}</dd>
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Financiador</dt>
+                            <dd class="col-7 mb-0">{{ $project->fundingSource?->nome ?? '—' }}</dd>
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Resp. Técnico</dt>
+                            <dd class="col-7 mb-0">{{ $project->responsavel ?? '—' }}</dd>
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Fonte</dt>
+                            <dd class="col-7 mb-0">{{ $project->fonte ?? $project->fundingSource?->nome ?? '—' }}</dd>
+
+                            @if($project->parlamentar)
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Parlamentar</dt>
+                            <dd class="col-7 mb-0">{{ $project->parlamentar }}</dd>
+                            @endif
+
+                            @if($project->secretaria)
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Secretaria</dt>
+                            <dd class="col-7 mb-0">{{ $project->secretaria }}</dd>
+                            @endif
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Local</dt>
+                            <dd class="col-7 mb-0">
+                                @if($project->executionLocations && $project->executionLocations->count() > 0)
+                                    {{ $project->executionLocations->map(fn($loc) => trim(($loc->cidade ?? '') . '/' . ($loc->estado ?? ''), '/'))->filter()->implode(', ') }}
+                                @else
+                                    {{ $project->local_execucao ?? '—' }}
+                                @endif
+                            </dd>
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Início</dt>
+                            <dd class="col-7 mb-0">{{ $project->data_inicio?->format('d/m/Y') ?? '—' }}</dd>
+
+                            <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Término</dt>
+                            <dd class="col-7 mb-0">{{ $project->data_fim?->format('d/m/Y') ?? '—' }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">Objetivo Geral</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        {{ $project->objetivo_geral ?? 'Não informado.' }}
+                    </div>
+                </div>
+            </div>
+
+            @if($project->descricao)
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Objeto</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">{{ $project->descricao }}</div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->specificObjectives && $project->specificObjectives->count() > 0)
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Objetivos Específicos</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        @foreach($project->specificObjectives as $obj)
+                            <div class="{{ !$loop->last ? 'mb-1' : '' }}">
+                                <i class="bi bi-dash me-1 text-muted"></i>{{ $obj->objetivo ?? $obj->descricao ?? '' }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->metodologia)
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Metodologia</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">{{ $project->metodologia }}</div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->publico_alvo)
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Público-Alvo</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">{{ $project->publico_alvo }}</div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->justificativa)
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Justificativa</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">{{ $project->justificativa }}</div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->data_local_horario || $project->quantidade_publico || $project->municipios_alcancados || $project->descricao_servico)
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-people me-1"></i> Programação e Público</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        <dl class="row mb-0" style="row-gap: 10px;">
+                            @if($project->data_local_horario)
+                                <dt class="col-md-3" style="color: var(--text-muted); font-weight: 500;">Data, Local e Horário</dt>
+                                <dd class="col-md-9 mb-0">{!! nl2br(e($project->data_local_horario)) !!}</dd>
+                            @endif
+                            @if($project->quantidade_publico)
+                                <dt class="col-md-3" style="color: var(--text-muted); font-weight: 500;">Público Estimado</dt>
+                                <dd class="col-md-9 mb-0">{{ number_format($project->quantidade_publico, 0, ',', '.') }} pessoas</dd>
+                            @endif
+                            @if($project->municipios_alcancados)
+                                <dt class="col-md-3" style="color: var(--text-muted); font-weight: 500;">Municípios Alcançados</dt>
+                                <dd class="col-md-9 mb-0">{!! nl2br(e($project->municipios_alcancados)) !!}</dd>
+                            @endif
+                            @if($project->descricao_servico)
+                                <dt class="col-md-3" style="color: var(--text-muted); font-weight: 500;">Descrição do Serviço</dt>
+                                <dd class="col-md-9 mb-0">{!! nl2br(e($project->descricao_servico)) !!}</dd>
+                            @endif
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->capacidade_tecnica || $project->capabilityPhotos->count())
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-tools me-1"></i> Capacidade Técnica</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        @if($project->capacidade_tecnica)
+                            <p style="margin-bottom: 12px;">{!! nl2br(e($project->capacidade_tecnica)) !!}</p>
+                        @endif
+                        @if($project->capabilityPhotos->count())
+                            <div class="row g-2">
+                                @foreach($project->capabilityPhotos as $photo)
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="card h-100">
+                                        <img src="{{ asset('storage/' . $photo->file_path) }}"
+                                             class="card-img-top" style="height: 140px; object-fit: cover;"
+                                             alt="Foto da capacidade">
+                                        @if($photo->legenda)
+                                        <div class="card-body p-2" style="font-size: 12px;">{{ $photo->legenda }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->teamMembers->count())
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-person-badge me-1"></i> Equipe</div>
+                    <div class="card-body" style="font-size: 13.5px;">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size: 12px;">Função</th>
+                                    <th style="font-size: 12px; width: 70px;">Qtd.</th>
+                                    <th style="font-size: 12px;">Atribuições</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($project->teamMembers as $tm)
+                                <tr>
+                                    <td>{{ $tm->funcao }}</td>
+                                    <td>{{ $tm->quantidade }}</td>
+                                    <td>{{ $tm->descricao ?? '—' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->funcao_osc || $project->recolhimento_impostos)
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-bank me-1"></i> Função da OSC e Tributação</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        @if($project->funcao_osc)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Função da OSC</div>
+                            <p style="margin-bottom: 12px;">{!! nl2br(e($project->funcao_osc)) !!}</p>
+                        @endif
+                        @if($project->recolhimento_impostos)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Recolhimento de Impostos</div>
+                            <p style="margin-bottom: 0;">{!! nl2br(e($project->recolhimento_impostos)) !!}</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->contractedServices->count())
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-receipt me-1"></i> Descrição dos Serviços Contratados</div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0" style="font-size: 13px;">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Descrição do Serviço</th>
+                                        <th>Período</th>
+                                        <th>Pagamento</th>
+                                        <th class="text-end">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $totalServicos = 0; @endphp
+                                    @foreach($project->contractedServices as $sv)
+                                        @php $totalServicos += (float) $sv->valor; @endphp
+                                        <tr>
+                                            <td><span class="badge bg-{{ $sv->tipo_contratacao == 'PF' ? 'info' : 'primary' }}">{{ $sv->tipo_contratacao_label ?? $sv->tipo_contratacao }}</span></td>
+                                            <td>{{ $sv->descricao }}</td>
+                                            <td>{{ $sv->periodo_execucao ? $sv->periodo_execucao . ' ' . ($sv->unidade_periodo_label ?? $sv->unidade_periodo) : '—' }}</td>
+                                            <td>{{ $sv->tipo_pagamento_label ?? $sv->tipo_pagamento }}</td>
+                                            <td class="text-end" style="font-weight: 600;">{{ $sv->valor !== null ? 'R$ ' . number_format($sv->valor, 2, ',', '.') : '—' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total</th>
+                                        <th class="text-end">R$ {{ number_format($totalServicos, 2, ',', '.') }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->riscos_identificados || $project->plano_mitigacao)
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-shield-exclamation me-1"></i> Riscos e Mitigação</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        @if($project->riscos_identificados)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Riscos Identificados</div>
+                            <p style="margin-bottom: 12px;">{!! nl2br(e($project->riscos_identificados)) !!}</p>
+                        @endif
+                        @if($project->plano_mitigacao)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Plano de Mitigação</div>
+                            <p style="margin-bottom: 0;">{!! nl2br(e($project->plano_mitigacao)) !!}</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->resultados_esperados || $project->plano_divulgacao)
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-megaphone me-1"></i> Resultados e Divulgação</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        @if($project->resultados_esperados)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Resultados Esperados</div>
+                            <p style="margin-bottom: 12px;">{!! nl2br(e($project->resultados_esperados)) !!}</p>
+                        @endif
+                        @if($project->plano_divulgacao)
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;">Plano de Divulgação</div>
+                            <p style="margin-bottom: 0;">{!! nl2br(e($project->plano_divulgacao)) !!}</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->outros_patrocinadores)
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-building me-1"></i> Outros Patrocinadores</div>
+                    <div class="card-body" style="font-size: 13.5px; line-height: 1.6;">
+                        {{ $project->quais_patrocinadores ?: 'Patrocinadores não especificados.' }}
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($project->data_assinatura || $project->nome_presidente || $project->assinatura_path)
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-pen me-1"></i> Assinatura</div>
+                    <div class="card-body" style="font-size: 13.5px;">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-{{ $project->assinatura_path ? '6' : '12' }}">
+                                <dl class="row mb-0" style="row-gap: 8px;">
+                                    @if($project->nome_presidente)
+                                        <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Presidente</dt>
+                                        <dd class="col-7 mb-0">{{ $project->nome_presidente }}</dd>
+                                    @endif
+                                    @if($project->data_assinatura)
+                                        <dt class="col-5" style="color: var(--text-muted); font-weight: 500;">Data</dt>
+                                        <dd class="col-7 mb-0">{{ $project->data_assinatura->format('d/m/Y') }}</dd>
+                                    @endif
+                                </dl>
+                            </div>
+                            @if($project->assinatura_path)
+                            <div class="col-md-6 text-md-end">
+                                <img src="{{ asset('storage/' . $project->assinatura_path) }}"
+                                     alt="Assinatura"
+                                     style="max-height: 100px; border: 1px solid var(--border); padding: 8px; border-radius: var(--radius); background: #fff;">
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 2: Despesas
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'despesas' ? 'show active' : '' }}" id="tab-despesas">
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ route('despesas.create') }}?project_id={{ $project->id }}" class="btn btn-primary">
+                <i class="bi bi-plus"></i> Nova Despesa
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Fornecedor</th>
+                        <th>Categoria</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($project->expenses as $e)
+                    @php $sc = ['PAGO' => 'success', 'APROVADO' => 'primary', 'REJEITADO' => 'danger', 'PENDENTE' => 'warning']; @endphp
+                    <tr>
+                        <td style="font-size: 13px;">{{ Str::limit($e->descricao, 40) }}</td>
+                        <td style="font-size: 13px;">{{ $e->fornecedor ?? '—' }}</td>
+                        <td style="font-size: 13px;">{{ $e->categoria ?? '—' }}</td>
+                        <td style="font-size: 13px;">{{ $e->data_despesa?->format('d/m/Y') ?? '—' }}</td>
+                        <td style="font-size: 13px; font-weight: 600;">R$ {{ number_format($e->valor, 2, ',', '.') }}</td>
+                        <td><span class="badge bg-{{ $sc[$e->status] ?? 'secondary' }}">{{ $e->status_label }}</span></td>
+                        <td>
+                            <a href="{{ route('despesas.edit', ['despesa' => $e]) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center" style="padding: 40px 16px; color: var(--text-muted);">
+                            Nenhuma despesa registrada.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 3: Metas
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'metas' ? 'show active' : '' }}" id="tab-metas">
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ route('projetos.metas.create', ['projeto' => $project]) }}" class="btn btn-primary">
+                <i class="bi bi-plus"></i> Nova Meta
+            </a>
+        </div>
+
+        @forelse($project->goals as $goal)
+        @php
+            $tipoMeta = $goal->tipo_meta ?? null;
+            $tipoBadgeStyle = match($tipoMeta) {
+                'QUANTITATIVA' => 'bg-info',
+                'QUALITATIVA'  => 'bg-secondary',
+                default        => 'bg-light text-dark border',
+            };
+            $metaNum = $goal->numero ?? str_pad($loop->iteration, 2, '0', STR_PAD_LEFT);
+            $podEnviarAnalise = in_array($goal->status, ['PENDENTE', 'EM_ANDAMENTO']);
+        @endphp
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span style="font-weight: 600;">
+                    <span class="badge bg-dark me-1" style="font-size: 11px;">Meta {{ $metaNum }}</span>
+                    {{ $goal->titulo }}
+                    @if($tipoMeta)
+                        <span class="badge {{ $tipoBadgeStyle }} ms-1" style="font-size: 10px; font-weight: 500;">{{ $tipoMeta }}</span>
+                    @endif
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-{{ $goal->status_color }}">{{ $goal->status_label }}</span>
+                    @if($podEnviarAnalise)
+                    <form method="POST" action="{{ route('projetos.metas.send-analysis', ['projeto' => $project, 'meta' => $goal]) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-warning" title="Enviar para Análise">
+                            <i class="bi bi-send"></i> Enviar para Análise
+                        </button>
+                    </form>
+                    @endif
+                    <a href="{{ route('projetos.metas.edit', ['projeto' => $project, 'meta' => $goal]) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="{{ route('projetos.metas.destroy', ['projeto' => $project, 'meta' => $goal]) }}" onsubmit="return confirm('Excluir esta meta?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger" title="Excluir">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px;">Indicador</div>
+                        <div style="font-size: 13.5px;">{{ $goal->indicador ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px;">Quantidade</div>
+                        <div style="font-size: 13.5px;">{{ $goal->quantidade_realizada ?? 0 }} / {{ $goal->quantidade_prevista ?? '—' }} {{ $goal->unidade_medida }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px;">Aferição</div>
+                        <div style="font-size: 13.5px;">{{ $goal->afericao_meta ?? $goal->descricao ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px;">Prazo</div>
+                        <div style="font-size: 13.5px;">{{ $goal->prazo?->format('d/m/Y') ?? '—' }}</div>
+                    </div>
+                </div>
+
+                @if($goal->activities->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-sm mb-2">
+                        <thead>
+                            <tr>
+                                <th>Atividade</th>
+                                <th>Responsável</th>
+                                <th>Prazo</th>
+                                <th style="min-width: 110px;">Progresso</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($goal->activities as $act)
+                            <tr>
+                                <td style="font-size: 13px;">{{ $act->nome }}</td>
+                                <td style="font-size: 13px;">{{ $act->responsavel ?? '—' }}</td>
+                                <td style="font-size: 13px;">{{ $act->data_fim?->format('d/m/Y') ?? '—' }}</td>
+                                <td>
+                                    <div class="progress mb-1" style="height: 5px;">
+                                        <div class="progress-bar bg-success" style="width: {{ $act->percentual_execucao }}%;"></div>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-muted);">{{ $act->percentual_execucao }}%</span>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ $act->status }}</span></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#act-{{ $goal->id }}">
+                    <i class="bi bi-plus"></i> Adicionar Atividade
+                </button>
+                <div class="collapse mt-2" id="act-{{ $goal->id }}">
+                    <form method="POST" action="{{ route('projetos.metas.activities.store', ['projeto' => $project, 'meta' => $goal]) }}" class="p-3" style="background: var(--bg-muted); border: 1px solid var(--border); border-radius: var(--radius);">
+                        @csrf
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <input type="text" name="nome" class="form-control form-control-sm" placeholder="Nome da atividade *" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="responsavel" class="form-control form-control-sm" placeholder="Responsável">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" name="data_fim" class="form-control form-control-sm" title="Prazo">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" name="percentual_execucao" class="form-control form-control-sm" placeholder="% exec." min="0" max="100" value="0">
+                            </div>
+                            <div class="col-md-4">
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="PENDENTE">Pendente</option>
+                                    <option value="EM_ANDAMENTO">Em Andamento</option>
+                                    <option value="CONCLUIDO">Concluído</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-sm btn-primary w-100">
+                                    <i class="bi bi-check-lg"></i> Salvar Atividade
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="text-center" style="padding: 48px 16px; color: var(--text-muted);">
+            <i class="bi bi-bullseye" style="font-size: 32px; display: block; margin-bottom: 12px; opacity: .4;"></i>
+            <div style="font-size: 14px; margin-bottom: 12px;">Nenhuma meta cadastrada para este projeto.</div>
+            <a href="{{ route('projetos.metas.create', ['projeto' => $project]) }}" class="btn btn-primary">
+                <i class="bi bi-plus"></i> Criar primeira meta
+            </a>
+        </div>
+        @endforelse
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 4: Comprovação (por Meta)
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'comprovacao' ? 'show active' : '' }}" id="tab-comprovacao">
+        @if($totalMetas === 0)
+            <div class="text-center" style="padding: 48px 16px; color: var(--text-muted);">
+                <i class="bi bi-camera" style="font-size: 32px; display: block; margin-bottom: 12px; opacity: .4;"></i>
+                <div style="font-size: 14px;">Cadastre metas no projeto para iniciar a comprovação.</div>
+            </div>
+        @else
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-3" style="font-size: 13px;">
+            <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+            <div>
+                Cada meta deve possuir <strong>5 fotos JPG</strong> e <strong>texto descritivo</strong> obrigatórios. O <em>link de vídeo</em> e o <em>anexo</em> são opcionais.
+            </div>
+        </div>
+
+        <div class="accordion" id="accProofs">
+            @foreach($project->goals as $goal)
+            @php
+                $proof = $goal->proof;
+                $fotos = $proof?->fotos ?? [];
+                $isComplete = $proof && $proof->isComplete();
+                $metaNum = $goal->numero ?? str_pad($loop->iteration, 2, '0', STR_PAD_LEFT);
+            @endphp
+            <div class="accordion-item card mb-2">
+                <h2 class="accordion-header" id="proofH{{ $goal->id }}">
+                    <button class="accordion-button collapsed d-flex align-items-center" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#proofC{{ $goal->id }}"
+                            style="font-weight: 600; font-size: 14px; padding: 14px 18px;">
+                        <span class="badge bg-dark me-2">Meta {{ $metaNum }}</span>
+                        <span class="me-auto">{{ $goal->titulo }}</span>
+                        @if($isComplete)
+                            <span class="badge bg-success me-2"><i class="bi bi-check-circle-fill"></i> Comprovação OK</span>
+                        @else
+                            <span class="badge bg-warning me-2"><i class="bi bi-exclamation-circle-fill"></i> Pendente</span>
+                        @endif
+                        <span class="text-muted" style="font-size: 11px;">{{ count($fotos) }}/5 fotos</span>
+                    </button>
+                </h2>
+                <div id="proofC{{ $goal->id }}" class="accordion-collapse collapse" data-bs-parent="#accProofs">
+                    <div class="card-body">
+                        <form method="POST"
+                              action="{{ route('projetos.metas.proof.save', ['projeto' => $project, 'meta' => $goal]) }}"
+                              enctype="multipart/form-data" data-turbo="false">
+                            @csrf
+
+                            {{-- Galeria de fotos atuais --}}
+                            @if(count($fotos))
+                                <div class="row g-2 mb-3">
+                                    @foreach($fotos as $idx => $foto)
+                                    <div class="col-md-2 col-sm-4">
+                                        <div class="card h-100" style="position: relative;">
+                                            <img src="{{ asset('storage/' . $foto) }}" class="card-img-top"
+                                                 style="height: 100px; object-fit: cover;" alt="Foto {{ $idx+1 }}">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger"
+                                                    style="position: absolute; top: 4px; right: 4px; padding: 2px 6px;"
+                                                    onclick="deleteProofPhoto({{ $project->id }}, {{ $goal->id }}, {{ $idx }})">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">
+                                        Fotos JPG <span class="text-danger">*</span>
+                                        <small class="text-muted ms-1">(adicionar até completar 5)</small>
+                                    </label>
+                                    <input type="file" name="fotos[]" class="form-control"
+                                           accept="image/jpeg,image/jpg" multiple
+                                           {{ count($fotos) >= 5 ? 'disabled' : '' }}>
+                                    @if(count($fotos) >= 5)
+                                        <small class="text-success">5 fotos enviadas. Apague alguma para adicionar nova.</small>
+                                    @else
+                                        <small class="text-muted">Máx. 6MB cada. Faltam {{ 5 - count($fotos) }} foto(s).</small>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label">Texto Descritivo <span class="text-danger">*</span></label>
+                                    <textarea name="descricao" class="form-control" rows="3" required>{{ $proof?->descricao }}</textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Link do Vídeo <small class="text-muted ms-1">(opcional)</small></label>
+                                    <input type="url" name="link_video" class="form-control"
+                                           value="{{ $proof?->link_video }}"
+                                           placeholder="https://youtube.com/...">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Anexo <small class="text-muted ms-1">(opcional, qualquer arquivo)</small></label>
+                                    <input type="file" name="anexo" class="form-control">
+                                    @if($proof?->anexo_path)
+                                        <small class="d-flex align-items-center gap-2 mt-1">
+                                            <i class="bi bi-paperclip"></i>
+                                            <a href="{{ asset('storage/' . $proof->anexo_path) }}" target="_blank">{{ $proof->anexo_nome ?? 'Arquivo' }}</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto"
+                                                    style="padding: 0 6px;"
+                                                    onclick="deleteProofAttachment({{ $project->id }}, {{ $goal->id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </small>
+                                    @endif
+                                </div>
+
+                                <div class="col-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Salvar Comprovação da Meta {{ $metaNum }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 5: Diligências (5 avaliadores por meta)
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'diligencias' ? 'show active' : '' }}" id="tab-diligencias">
+        @if($totalMetas === 0)
+            <div class="text-center" style="padding: 48px 16px; color: var(--text-muted);">
+                <i class="bi bi-clipboard-check" style="font-size: 32px; display: block; margin-bottom: 12px; opacity: .4;"></i>
+                <div style="font-size: 14px;">Cadastre metas no projeto para iniciar diligências.</div>
+            </div>
+        @else
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="alert alert-info d-flex align-items-start gap-2 mb-0 flex-grow-1 me-3" style="font-size: 13px;">
+                <i class="bi bi-shield-check flex-shrink-0 mt-1"></i>
+                <div>
+                    Cada meta requer <strong>aprovação dos 5 avaliadores</strong> após a comprovação completa.
+                    O ponto verde 🟢 indica avaliador que já aprovou. Quando todas as metas estiverem aprovadas pelos 5,
+                    o botão <em>"Enviar para Prestação de Contas"</em> ficará disponível.
+                </div>
+            </div>
+            @php
+                $allApproved = $project->goals->isNotEmpty() && $project->goals->every(fn($g) => $g->fullyApproved());
+            @endphp
+            @if($allApproved && $project->status !== 'PRESTACAO_CONTAS' && $project->status !== 'PRESTACAO_APROVADA')
+            <form method="POST" action="{{ route('projetos.send-accounting', ['projeto' => $project]) }}" data-turbo="false">
+                @csrf
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-arrow-right-circle-fill"></i> Enviar para Prestação de Contas
+                </button>
+            </form>
+            @elseif(!$allApproved)
+                <button class="btn btn-secondary" disabled title="Aguardando todas as metas serem aprovadas pelos 5 avaliadores">
+                    <i class="bi bi-lock"></i> Aguardando aprovações
+                </button>
+            @endif
+        </div>
+
+        @foreach($project->goals as $goal)
+        @php
+            $proof = $goal->proof;
+            $proofComplete = $proof && $proof->isComplete();
+            $metaNum = $goal->numero ?? str_pad($loop->iteration, 2, '0', STR_PAD_LEFT);
+            $approvalsByNum = $goal->approvals->keyBy('avaliador_numero');
+            $aprovedCount = $goal->approvedCount();
+        @endphp
+        <div class="card mb-3">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge bg-dark me-2">Meta {{ $metaNum }}</span>
+                    <strong>{{ $goal->titulo }}</strong>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    @if($goal->fullyApproved())
+                        <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Aprovada ({{ $aprovedCount }}/5)</span>
+                    @else
+                        <span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> {{ $aprovedCount }}/5 aprovações</span>
+                    @endif
+                </div>
+            </div>
+            <div class="card-body">
+                {{-- Resumo da comprovação --}}
+                @if($proofComplete)
+                    <div class="mb-3" style="font-size: 13px;">
+                        <div class="row g-2">
+                            @foreach(($proof->fotos ?? []) as $foto)
+                            <div class="col-md-2 col-sm-3">
+                                <a href="{{ asset('storage/' . $foto) }}" target="_blank">
+                                    <img src="{{ asset('storage/' . $foto) }}"
+                                         style="width: 100%; height: 70px; object-fit: cover; border: 1px solid var(--border); border-radius: var(--radius);">
+                                </a>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-2 p-2" style="background: var(--bg-muted); border-radius: var(--radius); font-size: 13px;">
+                            <strong style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em;">Descrição</strong><br>
+                            {{ $proof->descricao }}
+                            @if($proof->link_video)
+                                <div class="mt-1"><i class="bi bi-play-circle"></i> <a href="{{ $proof->link_video }}" target="_blank">{{ $proof->link_video }}</a></div>
+                            @endif
+                            @if($proof->anexo_path)
+                                <div class="mt-1"><i class="bi bi-paperclip"></i> <a href="{{ asset('storage/' . $proof->anexo_path) }}" target="_blank">{{ $proof->anexo_nome ?? 'Anexo' }}</a></div>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <div class="alert alert-warning" style="font-size: 13px;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Comprovação incompleta. Aprovações só serão permitidas após a comprovação (5 fotos + descrição) na aba <strong>Comprovação</strong>.
+                    </div>
+                @endif
+
+                {{-- Slots dos 5 avaliadores --}}
+                <div class="row g-2 mb-3">
+                    @for($i = 1; $i <= 5; $i++)
+                    @php $ap = $approvalsByNum->get($i); $isApproved = $ap && $ap->aprovado; @endphp
+                    <div class="col-md col-sm-6">
+                        <div class="card h-100" style="border-color: {{ $isApproved ? '#86efac' : 'var(--border)' }};">
+                            <div class="card-body p-2 text-center" style="font-size: 12.5px;">
+                                <div class="d-flex justify-content-center align-items-center gap-1 mb-1">
+                                    @if($isApproved)
+                                        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #16a34a;" title="Aprovado"></span>
+                                    @else
+                                        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #d4d4d8;" title="Pendente"></span>
+                                    @endif
+                                    <strong>Avaliador {{ $i }}</strong>
+                                </div>
+                                @if($isApproved)
+                                    <div style="font-size: 11px; color: var(--text-muted);">{{ $ap->avaliador_nome ?? '—' }}</div>
+                                    <div style="font-size: 10px; color: var(--text-muted);">{{ $ap->aprovado_em?->format('d/m/Y H:i') }}</div>
+                                    <form method="POST" action="{{ route('projetos.metas.unapprove', ['projeto' => $project, 'meta' => $goal]) }}" class="mt-1" onsubmit="return confirm('Remover aprovação?')">
+                                        @csrf
+                                        <input type="hidden" name="avaliador_numero" value="{{ $i }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="font-size: 11px; padding: 2px 4px;">
+                                            <i class="bi bi-x"></i> Remover
+                                        </button>
+                                    </form>
+                                @else
+                                    <button class="btn btn-sm btn-outline-success w-100"
+                                            style="font-size: 11px; padding: 2px 4px;"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#aprBox{{ $goal->id }}-{{ $i }}"
+                                            {{ $proofComplete ? '' : 'disabled' }}>
+                                        <i class="bi bi-check-circle"></i> Aprovar
+                                    </button>
+                                    <div class="collapse mt-2" id="aprBox{{ $goal->id }}-{{ $i }}">
+                                        <form method="POST" action="{{ route('projetos.metas.approve', ['projeto' => $project, 'meta' => $goal]) }}">
+                                            @csrf
+                                            <input type="hidden" name="avaliador_numero" value="{{ $i }}">
+                                            <select name="avaliador_nome" class="form-select form-select-sm mb-1" style="font-size: 11px;" required>
+                                                <option value="">— Selecione seu papel —</option>
+                                                <option value="Diretor da Entidade">Diretor da Entidade</option>
+                                                <option value="Responsável Técnico">Responsável Técnico</option>
+                                                <option value="Conselho Fiscal 01">Conselho Fiscal 01</option>
+                                                <option value="Conselho Fiscal 02">Conselho Fiscal 02</option>
+                                                <option value="Conselho Fiscal 03">Conselho Fiscal 03</option>
+                                            </select>
+                                            <textarea name="observacoes" class="form-control form-control-sm mb-1"
+                                                      rows="2" placeholder="Observações (opcional)"
+                                                      style="font-size: 11px;"></textarea>
+                                            <button type="submit" class="btn btn-sm btn-success w-100" style="font-size: 11px;">
+                                                <i class="bi bi-check-lg"></i> Confirmar
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endfor
+                </div>
+
+                {{-- Diligências livres relacionadas (legacy) --}}
+                @php $diligenciasMeta = $project->diligences->where('goal_id', $goal->id); @endphp
+                @if($diligenciasMeta->count() > 0)
+                <div class="mt-3">
+                    <h6 style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em;">Diligências registradas</h6>
+                    @foreach($diligenciasMeta as $d)
+                    @php $dc = ['ABERTA' => 'danger', 'RESPONDIDA' => 'warning', 'ENCERRADA' => 'success']; @endphp
+                    <div class="d-flex align-items-center justify-content-between mb-1" style="font-size: 13px;">
+                        <div>
+                            <span class="badge bg-{{ $dc[$d->status] ?? 'secondary' }} me-2">{{ $d->status_label }}</span>
+                            <strong>{{ $d->tipo }}</strong>
+                            <span class="text-muted ms-1">{{ Str::limit($d->descricao, 80) }}</span>
+                        </div>
+                        <a href="{{ route('diligencias.show', ['diligencia' => $d]) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+        </div>
+        @endforeach
+
+        <div class="text-center mt-3">
+            <a href="{{ route('diligencias.create') }}?project_id={{ $project->id }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-plus"></i> Registrar diligência avulsa
+            </a>
+        </div>
+        @endif
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 6: Prestação de Contas (status por meta)
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'prestacao' ? 'show active' : '' }}" id="tab-prestacao">
+        @if($totalMetas === 0)
+            <div class="text-center" style="padding: 48px 16px; color: var(--text-muted);">
+                <i class="bi bi-file-earmark-ruled" style="font-size: 32px; display: block; margin-bottom: 12px; opacity: .4;"></i>
+                <div style="font-size: 14px;">Cadastre metas para iniciar a prestação de contas.</div>
+            </div>
+        @else
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-3" style="font-size: 13px;">
+            <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+            <div>
+                Acompanhe o status individual de cada meta. Apenas metas <strong>100% aprovadas</strong> (5 avaliadores) avançam para Prestação de Contas finalizada.
+            </div>
+        </div>
+
+        <div class="row g-3">
+            @foreach($project->goals as $goal)
+            @php
+                $cs = $goal->complianceStatus();
+                $metaNum = $goal->numero ?? str_pad($loop->iteration, 2, '0', STR_PAD_LEFT);
+                $iconMap = [
+                    'success' => 'bi-check-circle-fill',
+                    'warning' => 'bi-hourglass-split',
+                    'info'    => 'bi-search',
+                    'danger'  => 'bi-x-circle-fill',
+                ];
+                $emojiMap = [
+                    'success' => '✅',
+                    'warning' => '⏳',
+                    'info'    => '🔍',
+                    'danger'  => '❌',
+                ];
+                $color = $cs['color'];
+                $progressBg = match($color) {
+                    'success' => '#16a34a',
+                    'warning' => '#d97706',
+                    'info'    => '#0369a1',
+                    'danger'  => '#dc2626',
+                    default   => '#71717a',
+                };
+            @endphp
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <span class="badge bg-dark me-2">Meta {{ $metaNum }}</span>
+                                <strong style="font-size: 14px;">{{ Str::limit($goal->titulo, 50) }}</strong>
+                            </div>
+                            <span class="badge bg-{{ $color }}">
+                                {{ $emojiMap[$color] ?? '' }} {{ $cs['label'] }}
+                            </span>
+                        </div>
+
+                        <div class="progress mb-1" style="height: 8px;">
+                            <div class="progress-bar"
+                                 style="width: {{ $cs['percent'] }}%; background: {{ $progressBg }};"
+                                 role="progressbar"></div>
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size: 11px; color: var(--text-muted);">
+                            <span>{{ $goal->approvedCount() }}/5 avaliadores</span>
+                            <strong>{{ $cs['percent'] }}%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Card de prestação de contas oficial (se já existir) --}}
+        @if($project->accountingReports && $project->accountingReports->count() > 0)
+        <div class="mt-4">
+            <h5 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Prestação de Contas oficial</h5>
+            @foreach($project->accountingReports as $ac)
+            @php $acColors = ['RASCUNHO' => 'secondary', 'ENVIADA' => 'primary', 'EM_ANALISE' => 'warning', 'APROVADA' => 'success', 'REPROVADA' => 'danger']; @endphp
+            <div class="card mb-2">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="badge bg-{{ $acColors[$ac->status] ?? 'secondary' }} me-2">{{ $ac->status_label }}</span>
+                        <span style="font-size: 13px;">{{ Str::limit($ac->observacoes ?? $ac->relatorio_texto ?? '—', 80) }}</span>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                            Enviada: {{ $ac->data_envio?->format('d/m/Y') ?? '—' }} ·
+                            Aprovação: {{ $ac->data_aprovacao?->format('d/m/Y') ?? '—' }}
+                        </div>
+                    </div>
+                    <a href="{{ route('prestacao-contas.show', ['prestacao_conta' => $ac]) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+        @endif
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 7: Relatório (PDF customizado)
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'relatorio' ? 'show active' : '' }}" id="tab-relatorio">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-file-earmark-pdf me-1"></i> Relatório do Projeto</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size: 13.5px;">
+                    Selecione o que deseja incluir no PDF. Apenas seções marcadas serão geradas.
+                </p>
+
+                <form method="POST" action="{{ route('projetos.relatorio.save', ['projeto' => $project]) }}" id="formRelSel" class="mb-3">
+                    @csrf
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selAll">
+                            <label class="form-check-label" for="selAll"><strong>Selecionar Tudo</strong></label>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        @php
+                            $opts = [
+                                'inc_informacoes'      => ['Termo de Referência',    'bi-info-circle'],
+                                'inc_despesas'         => ['Despesas',               'bi-receipt'],
+                                'inc_metas'            => ['Metas',                  'bi-bullseye'],
+                                'inc_comprovacao'      => ['Comprovação',            'bi-camera'],
+                                'inc_diligencias'      => ['Diligências',            'bi-clipboard-check'],
+                                'inc_prestacao_contas' => ['Prestação de Contas',    'bi-file-earmark-ruled'],
+                            ];
+                        @endphp
+                        @foreach($opts as $key => [$label, $ic])
+                        <div class="col-md-4">
+                            <div class="form-check border rounded p-2 ps-4" style="border-color: var(--border) !important;">
+                                <input class="form-check-input rel-sel"
+                                       type="checkbox" name="{{ $key }}"
+                                       id="{{ $key }}" value="1"
+                                       {{ $relSel[$key] ? 'checked' : '' }}>
+                                <label class="form-check-label" for="{{ $key }}">
+                                    <i class="bi {{ $ic }} me-1"></i> {{ $label }}
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-save"></i> Salvar Seleção
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="generateReportPdf({{ $project->id }})">
+                            <i class="bi bi-file-earmark-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════════════════════════════════
+         Tab 8: Compliance (vai pro site da entidade)
+    ═══════════════════════════════════════════════════════════ --}}
+    <div class="tab-pane fade {{ $activeTab === 'compliance' ? 'show active' : '' }}" id="tab-compliance">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-shield-check me-1"></i> Compliance</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size: 13.5px;">
+                    Selecione o que deseja publicar no compliance. O PDF gerado é destinado ao site da entidade (não ao governo).
+                </p>
+
+                <form method="POST" action="{{ route('projetos.compliance.save', ['projeto' => $project]) }}" id="formCompSel" class="mb-3">
+                    @csrf
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selAllComp">
+                            <label class="form-check-label" for="selAllComp"><strong>Selecionar Tudo</strong></label>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        @foreach($opts as $key => [$label, $ic])
+                        <div class="col-md-4">
+                            <div class="form-check border rounded p-2 ps-4" style="border-color: var(--border) !important;">
+                                <input class="form-check-input comp-sel"
+                                       type="checkbox" name="{{ $key }}"
+                                       id="comp_{{ $key }}" value="1"
+                                       {{ $compliance[$key] ? 'checked' : '' }}>
+                                <label class="form-check-label" for="comp_{{ $key }}">
+                                    <i class="bi {{ $ic }} me-1"></i> {{ $label }}
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-save"></i> Salvar Seleção
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="generateCompliancePdf({{ $project->id }})">
+                            <i class="bi bi-file-earmark-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // "Selecionar Tudo" no relatório
+        const selAll = document.getElementById('selAll');
+        const opts = document.querySelectorAll('.rel-sel');
+        function syncSelAll() {
+            const all = Array.from(opts).every(o => o.checked);
+            if (selAll) selAll.checked = all;
+        }
+        if (selAll) {
+            selAll.addEventListener('change', () => {
+                opts.forEach(o => o.checked = selAll.checked);
+            });
+            opts.forEach(o => o.addEventListener('change', syncSelAll));
+            syncSelAll();
+        }
+
+        // "Selecionar Tudo" no compliance
+        const selAllComp = document.getElementById('selAllComp');
+        const optsComp = document.querySelectorAll('.comp-sel');
+        function syncSelAllComp() {
+            const all = Array.from(optsComp).every(o => o.checked);
+            if (selAllComp) selAllComp.checked = all;
+        }
+        if (selAllComp) {
+            selAllComp.addEventListener('change', () => {
+                optsComp.forEach(o => o.checked = selAllComp.checked);
+            });
+            optsComp.forEach(o => o.addEventListener('change', syncSelAllComp));
+            syncSelAllComp();
+        }
+    });
+
+    function deleteProofPhoto(projectId, goalId, idx) {
+        if (!confirm('Excluir esta foto?')) return;
+        const fd = new FormData();
+        fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+        fd.append('_method', 'DELETE');
+        fd.append('index', idx);
+        fetch(`/projetos/${projectId}/metas/${goalId}/comprovacao/foto`, {
+            method: 'POST',
+            body: fd
+        }).then(() => window.location.reload());
+    }
+
+    function deleteProofAttachment(projectId, goalId) {
+        if (!confirm('Excluir este anexo?')) return;
+        const fd = new FormData();
+        fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+        fd.append('_method', 'DELETE');
+        fetch(`/projetos/${projectId}/metas/${goalId}/comprovacao/anexo`, {
+            method: 'POST',
+            body: fd
+        }).then(() => window.location.reload());
+    }
+
+    function generateReportPdf(projectId) {
+        const params = new URLSearchParams();
+        document.querySelectorAll('.rel-sel:checked').forEach(o => params.append(o.name, '1'));
+        window.location = `/projetos/${projectId}/relatorio/pdf?` + params.toString();
+    }
+
+    function generateCompliancePdf(projectId) {
+        const params = new URLSearchParams();
+        document.querySelectorAll('.comp-sel:checked').forEach(o => params.append(o.name, '1'));
+        window.location = `/projetos/${projectId}/compliance/pdf?` + params.toString();
+    }
+</script>
+@endpush
+
+@endsection

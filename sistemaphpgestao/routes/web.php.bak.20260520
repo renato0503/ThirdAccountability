@@ -1,0 +1,120 @@
+<?php
+use App\Http\Controllers\{
+    DashboardController, InstitutionController, ProjectController,
+    GoalController, ExpenseController, DocumentController,
+    DiligenceController, AccountingReportController,
+    UserController, AuditController, ReportController,
+    ProfileController, IntegrationController, SettingController,
+    PriceResearchController, ProjectReportController, ProjectComplianceController
+};
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', fn() => redirect()->route('dashboard'));
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+
+    // Perfil
+    Route::get('/perfil',    [ProfileController::class,'edit'])->name('profile.edit');
+    Route::patch('/perfil',  [ProfileController::class,'update'])->name('profile.update');
+    Route::delete('/perfil', [ProfileController::class,'destroy'])->name('profile.destroy');
+
+    // Instituições
+    Route::resource('instituicoes', InstitutionController::class);
+    Route::get('instituicoes/{instituico}/export-pdf', [InstitutionController::class,'exportPdf'])->name('instituicoes.export-pdf');
+    Route::patch('instituicoes/{instituico}/ativar', [InstitutionController::class,'activate'])->name('instituicoes.activate');
+    Route::delete('instituicoes/{instituico}/force-delete', [InstitutionController::class,'forceDelete'])->name('instituicoes.force-delete');
+    Route::post('instituicoes/{instituico}/diretores', [InstitutionController::class,'storeDirector'])->name('instituicoes.directors.store');
+    Route::patch('instituicoes/{instituico}/diretores/{diretor}', [InstitutionController::class,'updateDirector'])->name('instituicoes.directors.update');
+    Route::delete('instituicoes/{instituico}/diretores/{diretor}', [InstitutionController::class,'destroyDirector'])->name('instituicoes.directors.destroy');
+    Route::post('instituicoes/{instituico}/historico-projetos', [InstitutionController::class,'storeProjectHistory'])->name('instituicoes.project-history.store');
+    Route::delete('instituicoes/{instituico}/historico-projetos/{historia}', [InstitutionController::class,'destroyProjectHistory'])->name('instituicoes.project-history.destroy');
+
+    // Projetos
+    Route::resource('projetos', ProjectController::class);
+    Route::delete('projetos/{projeto}/fotos-capacidade/{foto}', [ProjectController::class,'deleteCapabilityPhoto'])->name('projetos.capability-photos.destroy');
+    Route::get('projetos/{projeto}/inventario-pdf', [ProjectController::class,'exportInventoryPdf'])->name('projetos.inventario-pdf');
+
+    // Metas (nested dentro de projeto)
+    Route::prefix('projetos/{projeto}')->name('projetos.')->group(function () {
+        Route::resource('metas', GoalController::class)->except(['index','show']);
+        Route::post('metas/{meta}/atividades', [GoalController::class,'storeActivity'])->name('metas.activities.store');
+        Route::post('metas/{meta}/enviar-analise', [GoalController::class,'sendToAnalysis'])->name('metas.send-analysis');
+        // Comprovação por meta
+        Route::post('metas/{meta}/comprovacao',                [GoalController::class,'saveProof'])->name('metas.proof.save');
+        Route::delete('metas/{meta}/comprovacao/foto',         [GoalController::class,'deleteProofPhoto'])->name('metas.proof.delete-photo');
+        Route::delete('metas/{meta}/comprovacao/anexo',        [GoalController::class,'deleteProofAttachment'])->name('metas.proof.delete-attachment');
+        // Aprovações (5 avaliadores)
+        Route::post('metas/{meta}/aprovar',                    [GoalController::class,'approve'])->name('metas.approve');
+        Route::post('metas/{meta}/desaprovar',                 [GoalController::class,'unapprove'])->name('metas.unapprove');
+        // Enviar projeto para Prestação de Contas
+        Route::post('enviar-prestacao',                        [GoalController::class,'sendToAccounting'])->name('send-accounting');
+        // Relatório selecionável
+        Route::post('relatorio/selecao',                       [ProjectReportController::class,'save'])->name('relatorio.save');
+        Route::get('relatorio/pdf',                            [ProjectReportController::class,'exportPdf'])->name('relatorio.pdf');
+        // Compliance selecionável (mesmo fluxo do relatório, vai pro site da entidade)
+        Route::post('compliance/selecao',                      [ProjectComplianceController::class,'save'])->name('compliance.save');
+        Route::get('compliance/pdf',                           [ProjectComplianceController::class,'exportPdf'])->name('compliance.pdf');
+    });
+
+    // Financeiro (despesas)
+    Route::get('/financeiro', [ExpenseController::class,'index'])->name('financeiro.index');
+    Route::resource('despesas', ExpenseController::class)->except(['index']);
+    Route::patch('despesas/{expense}/status', [ExpenseController::class,'updateStatus'])->name('despesas.status');
+
+    // Documentos
+    Route::resource('documentos', DocumentController::class)->only(['index','create','store','show','edit','update','destroy']);
+
+    // Diligências
+    Route::post('diligencias/metas/{meta}/parecer', [DiligenceController::class,'parecer'])->name('diligencias.metas.parecer');
+    Route::resource('diligencias', DiligenceController::class);
+
+    // Prestação de Contas
+    Route::resource('prestacao-contas', AccountingReportController::class);
+    Route::delete('prestacao-contas/{prestacao_conta}/fotos', [AccountingReportController::class,'removePhoto'])->name('prestacao-contas.remove-photo');
+
+    // Usuários
+    Route::resource('usuarios', UserController::class)->except(['show']);
+
+    // Auditoria
+    Route::get('/auditoria', [AuditController::class,'index'])->name('auditoria.index');
+
+    // Relatórios
+    Route::get('/relatorios', [ReportController::class,'index'])->name('relatorios.index');
+    Route::get('/relatorios/exportar', [ReportController::class,'export'])->name('relatorios.export');
+    Route::get('/relatorios/pdf/{tipo}', [ReportController::class,'pdf'])->name('relatorios.pdf');
+
+    // Integrações (CNPJ / CEP)
+    Route::get('/api/cnpj/{cnpj}', [IntegrationController::class,'cnpj'])->name('api.cnpj')->middleware('throttle:30,1');
+    Route::get('/api/cep/{cep}', [IntegrationController::class,'cep'])->name('api.cep')->middleware('throttle:30,1');
+
+    // API: metas por projeto (para diligências)
+    Route::get('/api/projetos/{projeto}/metas', function(\App\Models\Project $projeto) {
+        return $projeto->goals()->select('id','numero','titulo','status')->orderBy('numero')->get();
+    })->name('api.projetos.metas');
+
+    // Pesquisa de Preços Públicos / Cotação de Projetos
+    Route::get('/pesquisa-precos',                                 [PriceResearchController::class,'index'])->name('pesquisa-precos.index');
+    Route::get('/pesquisa-precos/criar',                           [PriceResearchController::class,'create'])->name('pesquisa-precos.create');
+    Route::post('/pesquisa-precos',                                [PriceResearchController::class,'store'])->name('pesquisa-precos.store');
+    Route::get('/pesquisa-precos/{pesquisa_preco}',                [PriceResearchController::class,'show'])->name('pesquisa-precos.show');
+    Route::get('/pesquisa-precos/{pesquisa_preco}/editar',         [PriceResearchController::class,'edit'])->name('pesquisa-precos.edit');
+    Route::put('/pesquisa-precos/{pesquisa_preco}',                [PriceResearchController::class,'update'])->name('pesquisa-precos.update');
+    Route::delete('/pesquisa-precos/{pesquisa_preco}',             [PriceResearchController::class,'destroy'])->name('pesquisa-precos.destroy');
+    Route::post('/pesquisa-precos/{pesquisa_preco}/buscar',        [PriceResearchController::class,'search'])->name('pesquisa-precos.search');
+    Route::get('/pesquisa-precos/{pesquisa_preco}/buscar',         [PriceResearchController::class,'search'])->name('pesquisa-precos.search.get');
+    Route::post('/pesquisa-precos/{pesquisa_preco}/resultados',    [PriceResearchController::class,'storeManualResult'])->name('pesquisa-precos.results.store');
+    Route::patch('/pesquisa-precos/{pesquisa_preco}/resultados/{resultado}/selecionar',
+        [PriceResearchController::class,'selectResult'])->name('pesquisa-precos.results.select');
+    Route::delete('/pesquisa-precos/{pesquisa_preco}/resultados/{resultado}',
+        [PriceResearchController::class,'destroyResult'])->name('pesquisa-precos.results.destroy');
+    Route::post('/pesquisa-precos/{pesquisa_preco}/referencia',    [PriceResearchController::class,'setReference'])->name('pesquisa-precos.set-reference');
+    Route::get('/pesquisa-precos/{pesquisa_preco}/export-pdf',     [PriceResearchController::class,'exportPdf'])->name('pesquisa-precos.export-pdf');
+
+    // Configurações (somente ADMIN_GERAL)
+    Route::get('/configuracoes', [SettingController::class,'index'])->name('configuracoes.index');
+    Route::put('/configuracoes', [SettingController::class,'update'])->name('configuracoes.update');
+    Route::post('/configuracoes/test-email', [SettingController::class,'testEmail'])->name('configuracoes.test-email');
+});
+
+require __DIR__.'/auth.php';

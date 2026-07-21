@@ -1,0 +1,8 @@
+[05-May-2026 12:01:47 America/Fortaleza] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Auth\User" not found in /home2/byree926/project.byrees.com/sistemaphpgestao/app/Models/User.php:8
+Stack trace:
+#0 {main}
+  thrown in /home2/byree926/project.byrees.com/sistemaphpgestao/app/Models/User.php on line 8
+[05-May-2026 12:01:54 America/Fortaleza] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Auth\User" not found in /home2/byree926/project.byrees.com/sistemaphpgestao/app/Models/User.php:8
+Stack trace:
+#0 {main}
+  thrown in /home2/byree926/project.byrees.com/sistemaphpgestao/app/Models/User.php on line 8
