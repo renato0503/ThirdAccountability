@@ -44,14 +44,7 @@ services:
     volumes:
       - ./apps/web/src:/app/src
       - ./packages:/app/packages
-    environment:
-      - VITE_API_URL=http://localhost:3000/api
-      - VITE_FIREBASE_PROJECT_ID=gestaosetor3
-      - VITE_FIREBASE_API_KEY=AIzaSyDyUHPkkKqBjLFUSgk8iYb8eYM1YQ4kFt4
-      - VITE_FIREBASE_AUTH_DOMAIN=gestaosetor3.firebaseapp.com
-      - VITE_FIREBASE_STORAGE_BUCKET=gestaosetor3.firebasestorage.app
-      - VITE_FIREBASE_APP_ID=1:137555502699:web:3b7b94beb1de287bf7f32e
-      - VITE_FIREBASE_MEASUREMENT_ID=G-DZ4EGDV6P0
-      - VITE_USE_EMULATOR=true
+    env_file:
+      - ./apps/web/.env
     depends_on:
       - api
