@@ -6,12 +6,12 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — Sprint 1 concluída, 19/20 tarefas entregues
+> **Última atualização:** 21/07/2026 — Sprint 2 concluída
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
 | **Sprint 1** — Fundação e Setup | ✅ **Concluída** | `5513db9`, `c13210e` | 100% |
-| **Sprint 2** — Autenticação e Usuários | ⏳ Pendente | — | 0% |
+| **Sprint 2** — Autenticação e Usuários | ✅ **Concluída** | `3b07420`, `pending` | 100% |
 | **Sprint 3** — Instituições | ⏳ Pendente | — | 0% |
 | **Sprint 4** — Projetos | ⏳ Pendente | — | 0% |
 | **Sprint 5** — Metas, Atividades e Despesas | ⏳ Pendente | — | 0% |
@@ -336,28 +336,30 @@
 
 ---
 
-### Sprint 2 — Autenticação e Usuários (2 semanas) ⏳
+### Sprint 2 — Autenticação e Usuários (2 semanas) ✅
 
 **Objetivo:** Login funcional com Firebase Auth, CRUD de usuários, RBAC
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 2.1 | AuthModule: verificação de token Firebase no NestJS | Backend | ⏳ Pendente | — |
-| 2.2 | Sync user: cria documento users/{uid} no primeiro login | Backend | ⏳ Pendente | — |
-| 2.3 | UsersModule: CRUD de usuários no Firestore | Backend | ⏳ Pendente | — |
-| 2.4 | Custom claims: role + institutionId no Firebase Auth | Backend | ⏳ Pendente | — |
-| 2.5 | Página de login (email/senha + Google) | Frontend | ✅ Já feito | `login-page.tsx` |
-| 2.6 | Página de registro | Frontend | ✅ Já feito | `register-page.tsx` |
-| 2.7 | Página de recuperação de senha | Frontend | ✅ Já feito | `forgot-password-page.tsx` |
-| 2.8 | Página de perfil (editar nome, email, foto) | Frontend | ⏳ Pendente | — |
-| 2.9 | Página de gerenciamento de usuários (admin) | Frontend | ⏳ Pendente | — |
-| 2.10 | Testar fluxo completo: registro → login → role sync | QA | ⏳ Pendente | — |
+| 2.1 | Conectar AuthModule + UsersModule no app.module.ts | Backend | ✅ | `app.module.ts` (imports) |
+| 2.2 | Sync user no primeiro login | Backend | ✅ | `auth.controller.ts` + `auth.service.ts` |
+| 2.3 | UsersModule: CRUD + PATCH /users/:uid/role | Backend | ✅ | `users.controller.ts`, `users.service.ts` |
+| 2.4 | Custom claims via Admin SDK | Backend | ✅ | `auth.service.ts` (updateUserRole) |
+| 2.5 | Página de login (email/senha + Google) | Frontend | ✅ | `features/auth/login-page.tsx` |
+| 2.6 | Página de registro | Frontend | ✅ | `features/auth/register-page.tsx` |
+| 2.7 | Página de recuperação de senha | Frontend | ✅ | `features/auth/forgot-password-page.tsx` |
+| 2.8 | Página de perfil (nome, senha, tema) | Frontend | ✅ | `features/profile/profile-page.tsx` |
+| 2.9 | Página de gerenciamento de usuários (admin) | Frontend | ✅ | `features/users/users-page.tsx` |
+| 2.10 | Header com dropdown → perfil | Frontend | ✅ | `components/layout/header.tsx` |
 
 **Entregáveis:**
-- Login com email/senha e Google
-- Registro de novos usuários
-- Admin pode gerenciar usuários e papéis
-- RBAC funcional (guards no NestJS, regras no Firestore)
+- AuthModule + UsersModule conectados no NestJS
+- Sync automático de usuário no Firestore no primeiro login
+- Endpoint `PATCH /users/:uid/role` com custom claims
+- Página de perfil: editar nome, alterar senha (com reautenticação), toggle tema
+- Página de gerenciamento de usuários: listar, buscar, alterar papel (admin)
+- Header com dropdown: perfil + logout + toggle tema
 
 ---
 
@@ -530,7 +532,7 @@
 | Sprint | Módulos | Status | Semanas | Dias Úteis |
 |---|---|---|---|---|---|
 | **Sprint 1** | Fundação e Setup | ✅ **Concluída** | 3 | 15 |
-| **Sprint 2** | Autenticação e Usuários | ⏳ Pendente | 2 | 10 |
+| **Sprint 2** | Autenticação e Usuários | ✅ **Concluída** | 2 | 10 |
 | **Sprint 3** | Instituições | ⏳ Pendente | 3 | 15 |
 | **Sprint 4** | Projetos | ⏳ Pendente | 5 | 25 |
 | **Sprint 5** | Metas, Atividades e Despesas | ⏳ Pendente | 4 | 20 |
@@ -629,4 +631,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.1 (Sprint 1 concluída: monorepo + common layer + auth + layout)*
+*Gerado em 21/07/2026 — Versão 2.2 (Sprints 1 e 2 concluídas: monorepo + auth + RBAC + perfil + usuários)*

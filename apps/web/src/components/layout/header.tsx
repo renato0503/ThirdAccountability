@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { useThemeStore } from '@/stores/theme-store';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Moon, Sun, LogOut, User } from 'lucide-react';
 
 export function Header() {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { theme, toggle } = useThemeStore();
 
@@ -52,9 +54,9 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/perfil')}>
               <User className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
+              <span>Meu Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
