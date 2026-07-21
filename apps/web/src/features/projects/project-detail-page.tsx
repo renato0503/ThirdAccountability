@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Trash2, FolderKanban, MapPin, Target, Users, Briefcase, CalendarDays, DollarSign } from 'lucide-react';
+import { GoalsSection } from '@/features/goals/goals-section';
 
 interface Project {
   id: string; nome: string; codigo?: string; status: string;
@@ -100,6 +101,7 @@ export function ProjectDetailPage() {
           <TabsTrigger value="locais">Locais</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="equipe">Equipe</TabsTrigger>
+          <TabsTrigger value="metas">Metas</TabsTrigger>
           <TabsTrigger value="servicos">Servicos</TabsTrigger>
         </TabsList>
 
@@ -181,6 +183,9 @@ export function ProjectDetailPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="metas">
+          <GoalsSection projectId={project.id} />
+        </TabsContent>
         <TabsContent value="servicos">
           <Card>
             <CardContent className="pt-6 space-y-3">

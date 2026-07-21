@@ -13,6 +13,8 @@ import { InstitutionDetailPage } from '@/features/institutions/institution-detai
 import { ProjectsListPage } from '@/features/projects/projects-list-page';
 import { ProjectFormPage } from '@/features/projects/project-form-page';
 import { ProjectDetailPage } from '@/features/projects/project-detail-page';
+import { ExpensesListPage } from '@/features/expenses/expenses-list-page';
+import { ExpenseFormPage } from '@/features/expenses/expense-form-page';
 
 export const router = createBrowserRouter([
   {
@@ -47,10 +49,8 @@ export const router = createBrowserRouter([
       { path: 'projetos/novo', element: <ProjectFormPage /> },
       { path: 'projetos/:id', element: <ProjectDetailPage /> },
       { path: 'projetos/:id/editar', element: <ProjectFormPage /> },
-      {
-        path: 'financeiro',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo Financeiro — Sprint 5</div>,
-      },
+      { path: 'financeiro', element: <ExpensesListPage /> },
+      { path: 'despesas/nova', element: <ExpenseFormPage /> },
       {
         path: 'documentos',
         element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Documentos — Sprint 6</div>,
