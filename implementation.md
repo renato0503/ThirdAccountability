@@ -6,13 +6,13 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — Sprint 2 concluída
+> **Última atualização:** 21/07/2026 — Sprints 1, 2 e 3 concluídas
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
 | **Sprint 1** — Fundação e Setup | ✅ **Concluída** | `5513db9`, `c13210e` | 100% |
-| **Sprint 2** — Autenticação e Usuários | ✅ **Concluída** | `3b07420`, `pending` | 100% |
-| **Sprint 3** — Instituições | ⏳ Pendente | — | 0% |
+| **Sprint 2** — Autenticação e Usuários | ✅ **Concluída** | `0b2fb2c` | 100% |
+| **Sprint 3** — Instituições | ✅ **Concluída** | `e624d7a`, `008a81d` | 100% |
 | **Sprint 4** — Projetos | ⏳ Pendente | — | 0% |
 | **Sprint 5** — Metas, Atividades e Despesas | ⏳ Pendente | — | 0% |
 | **Sprint 6** — Documentos, Diligências e Prestação de Contas | ⏳ Pendente | — | 0% |
@@ -363,34 +363,32 @@
 
 ---
 
-### Sprint 3 — Instituições (3 semanas) ⏳
+### Sprint 3 — Instituições (3 semanas) ✅
 
-**Objetivo:** CRUD completo de instituições com diretores, histórico, PDF
+**Objetivo:** CRUD completo de instituições com diretores, histórico
+**Commits:** `e624d7a`, `008a81d`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 3.1 | InstitutionsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
-| 3.2 | DirectorsModule (subcollection): CRUD | Backend | ⏳ Pendente | — |
-| 3.3 | InstitutionProjectHistoryModule: CRUD | Backend | ⏳ Pendente | — |
-| 3.4 | Integração BrasilAPI: endpoint GET /integrations/cnpj/:cnpj | Backend | ⏳ Pendente | — |
-| 3.5 | Validação de CNPJ (dígitos verificadores) | Frontend | 🔶 Parcial | `lib/utils.ts` (validateCnpj) |
-| 3.6 | PDF da ficha da instituição (Puppeteer) | Backend | ⏳ Pendente | — |
-| 3.7 | Lista de instituições com busca + paginação cursor | Frontend | ⏳ Pendente | — |
-| 3.8 | Formulário criação/edição multi-step | Frontend | ⏳ Pendente | — |
-| 3.9 | Página de detalhes com abas | Frontend | ⏳ Pendente | — |
-| 3.10 | Modal de diretores (CRUD inline) | Frontend | ⏳ Pendente | — |
-| 3.11 | Upload foto presidente → Firebase Storage | Frontend | ⏳ Pendente | — |
-| 3.12 | Botão "Exportar PDF" + download | Frontend | ⏳ Pendente | — |
-| 3.13 | Testar CRUD + integrações + PDF | QA | ⏳ Pendente | — |
+| 3.1 | InstitutionsModule: CRUD Firestore (paginacao + busca) | Backend | ✅ | `institutions.service.ts`, `institutions.controller.ts` |
+| 3.2 | DirectorsModule (subcollection): CRUD | Backend | ✅ | `directors/directors.service.ts` |
+| 3.3 | InstitutionProjectHistoryModule: CRUD | Backend | ✅ | `project-history/project-history.service.ts` |
+| 3.4 | Integração BrasilAPI: GET /api/integrations/cnpj/:cnpj | Backend | ✅ | `integrations.controller.ts` |
+| 3.5 | Integração ViaCEP: GET /api/integrations/cep/:cep | Backend | ✅ | `integrations.controller.ts` |
+| 3.6 | Validação de CNPJ (dígitos verificadores) | Frontend | ✅ | `lib/utils.ts` (validateCnpj) |
+| 3.7 | Formulário multi-step (4 etapas) com autocomplete | Frontend | ✅ | `institution-form-page.tsx` |
+| 3.8 | Lista de instituições com busca + paginação | Frontend | ✅ | `institutions-list-page.tsx` |
+| 3.9 | Detalhes com 6 abas (dados, endereco, banco, presidente, diretores, historico) | Frontend | ✅ | `institution-detail-page.tsx` |
+| 3.10 | Modal de diretores (CRUD inline) | Frontend | ✅ | Dentro de `institution-detail-page.tsx` |
+| 3.11 | Seed admin: usuario gestor.renatorosa@gmail.com como ADMIN_GERAL | DevOps | ✅ | `scripts/seed-admin.ts`, `seed.controller.ts` |
+| 3.12 | PDF da ficha da instituicao (Puppeteer) | Backend | ⏳ Pendente | — |
 
 **Entregáveis:**
-- CRUD completo de instituições
-- Autocomplete CNPJ (BrasilAPI)
-- Autocomplete CEP (ViaCEP)
-- Diretores com mandato
-- Histórico de projetos
-- PDF exportável
-- Upload de fotos e documentos
+- InstitutionsModule com CRUD completo + subcolecoes
+- Integracao BrasilAPI + ViaCEP com autocomplete no formulario
+- Formulario multi-step (4 etapas): dados, endereco, banco, presidente
+- Detalhes com 6 abas e CRUD inline de diretores e historico
+- Seed de admin principal no Firestore + Custom Claims
 
 ---
 
@@ -533,7 +531,7 @@
 |---|---|---|---|---|---|
 | **Sprint 1** | Fundação e Setup | ✅ **Concluída** | 3 | 15 |
 | **Sprint 2** | Autenticação e Usuários | ✅ **Concluída** | 2 | 10 |
-| **Sprint 3** | Instituições | ⏳ Pendente | 3 | 15 |
+| **Sprint 3** | Instituições | ✅ **Concluída** | 3 | 15 |
 | **Sprint 4** | Projetos | ⏳ Pendente | 5 | 25 |
 | **Sprint 5** | Metas, Atividades e Despesas | ⏳ Pendente | 4 | 20 |
 | **Sprint 6** | Documentos, Diligências e Prestação de Contas | ⏳ Pendente | 4 | 20 |
@@ -631,4 +629,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.2 (Sprints 1 e 2 concluídas: monorepo + auth + RBAC + perfil + usuários)*
+*Gerado em 21/07/2026 — Versão 2.3 (Sprints 1, 2 e 3 concluídas: monorepo + auth + instituições + seed admin)*

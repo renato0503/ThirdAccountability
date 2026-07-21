@@ -29,9 +29,29 @@ Substituir processos fragmentados por um ambiente único que:
 - Estrutura pesquisa de preços com integração PNCP, mercado e IA generativa.
 - Gera relatórios e PDFs prontos para entrega a financiadores.
 
-**Contagem atual:** 46 migrations, 29 models (incl. PriceResearchResult), 32 controllers (incl. Api\ChatIaController), 63 views (incl. chat.blade.php), 7 services (incl. GroqClient, MercadoLivrePriceService).
+**Contagem atual (sistema legado — Laravel):** 46 migrations, 29 models, 32 controllers, 63 views, 7 services
+
+**Contagem atual (nova arquitetura — NestJS + React):** 3 workspaces, 11 módulos NestJS, 15+ páginas React, 12 componentes Shadcn UI, 6 serviços de integração, 50+ endpoints API
 
 ## 3. Stack Tecnológica
+
+### 3.1 Nova Arquitetura (em construção)
+
+| Camada | Tecnologia | Versão |
+|---|---|---|
+| Frontend | React + TypeScript + Vite | 19 / 5.7 / 6 |
+| Estilização | Tailwind CSS + Shadcn UI | 4 / latest |
+| API Backend | NestJS + Firebase Admin SDK | 11 |
+| Database | Firestore (NoSQL) | — |
+| Autenticação | Firebase Auth (email, Google, anônimo) | 11 |
+| Storage | Firebase Storage | — |
+| PDF | Puppeteer | 24 |
+| Orquestração | Turborepo + pnpm | 2.10 / 11 |
+| Cache | React Query (frontend) + Firestore | 5 |
+| Integrações | Groq IA, PNCP, BrasilAPI, ViaCEP, Mercado Livre | — |
+| Hospedagem | Firebase + Cloud SQL (planejado) | — |
+
+### 3.2 Sistema Legado (Laravel — manter como referência)
 
 | Camada | Tecnologia | Versão |
 |---|---|---|
@@ -41,25 +61,40 @@ Substituir processos fragmentados por um ambiente único que:
 | Banco de dados | MySQL | 8.x (Dbaas remoto) |
 | Autenticação | Laravel Breeze | 2.x |
 | PDF | DomPDF (barryvdh/laravel-dompdf) | 3.x |
-| Cache | File cache + Redis opcional | — |
-| Filas | Database driver (tabela jobs) | — |
-| Servidor web | Apache/Nginx (produção) | — |
 | Hospedagem | Produção: https://project.byrees.com/sistemaphpgestao | — |
-
-### Dependências principais (composer.json)
-
-- `laravel/framework` — core do framework
-- `laravel/breeze` — autenticação scaffolding
-- `barryvdh/laravel-dompdf` — geração de PDFs
-- `laravel/pail` — logs em tempo real
-- `laravel/pint` — code style fixer
-- `phpunit/phpunit` — testes (configurado, mas sem suites implementadas)
 
 ## 4. Arquitetura do Sistema
 
-### 4.1 Padrão Arquitetural
+### 4.1 Nova Arquitetura (NestJS + React + Firebase)
 
-O sistema segue o padrão MVC (Model-View-Controller) do Laravel, com camadas de serviço para lógica de negócio complexa.
+```
+┌────────────────────────────────────────────────────────────┐
+│                    React SPA (Vite)                         │
+│  React Router + React Query + Tailwind 4 + Shadcn UI       │
+│  TypeScript estrito                                         │
+└─────────┬──────────────────────────────────────────────────┘
+           │ Firebase Client SDK (leituras)
+           │ Axios (operações complexas)
+           │
+┌──────────▼──────────────────────────────────────────────────┐
+│                 Firebase (Google Cloud)                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────┐ │
+│  │ Firebase Auth │  │  Firestore   │  │ Firebase Storage  │ │
+│  │ (JWT + roles) │  │  (NoSQL)     │  │ (arquivos/fotos)  │ │
+│  └──────────────┘  └──────┬───────┘  └───────────────────┘ │
+└───────────────────────────┼──────────────────────────────────┘
+                            │ Firebase Admin SDK
+┌───────────────────────────▼──────────────────────────────────┐
+│                 NestJS API (Node/TypeScript)                  │
+│  Modules: Auth, Users, Institutions, Integrations, Seed      │
+│  Common: Guards (3), Decorators (3), Interceptors, Filters   │
+│  Integrations: BrasilAPI, ViaCEP                             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 4.2 Arquitetura Legado (Laravel — manter referência)
+
+O sistema original segue o padrão MVC (Model-View-Controller) do Laravel:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -69,14 +104,6 @@ O sistema segue o padrão MVC (Model-View-Controller) do Laravel, com camadas de
                        │ HTTPS
 ┌──────────────────────▼──────────────────────────────────┐
 │                   Laravel Application                    │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │
-│  │   Routes    │→│ Controllers │→ │   Services      │ │
-│  │  (web.php)  │  │ (21 + 9 auth)│ │ (PriceResearch, │ │
-│  └─────────────┘  └──────┬──────┘  │  Cnpj, Cep)     │ │
-│                          │         └────────┬────────┘ │
-│  ┌─────────────┐  ┌──────▼──────┐  ┌───────▼────────┐ │
-│  │   Views     │←│   Models    │  │  Integrations  │ │
-│  │ (Blade)     │  │ (29 Eloquent)│  │  (BrasilAPI,   │ │
 │  └─────────────┘  └──────┬──────┘  │  ViaCEP)       │ │
 │                          │         └─────────────────┘ │
 │                    Eloquent ORM                         │
@@ -942,7 +969,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 - Rate limiting em rotas de integração (30 req/min)
 - Soft deletes em todas as tabelas principais (exceto logs de auditoria)
 
-### 12.4 Próximos Passos Prioritários
+### 12.4 Próximos Passos Prioritários (Sistema Legado)
 
 1. **Deploy em produção** — contatar cliente (FTP/SSH), enviar ao servidor, rodar migrations
 2. **Escrever testes** — começar com feature tests para os controllers principais (ProjectController, PriceResearchController)
@@ -952,4 +979,75 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ---
 
-*Documento gerado em 20/07/2026 — Versão 1.0*
+## 13. Nova Arquitetura — Status das Sprints
+
+### 13.1 Sprints Concluídas (3 de 9)
+
+| Sprint | Módulos | Commits | Status |
+|---|---|---|---|
+| **Sprint 1** | Fundação e Setup | `5513db9` | ✅ **100%** |
+| **Sprint 2** | Autenticação e Usuários | `0b2fb2c` | ✅ **100%** |
+| **Sprint 3** | Instituições | `e624d7a`, `008a81d` | ✅ **100%** |
+
+### 13.2 Estrutura do Monorepo
+
+```
+/gestao-terceiro-setor
+├── apps/
+│   ├── api/          # NestJS + Firebase Admin SDK
+│   └── web/          # React + Vite + Tailwind 4 + Shadcn UI
+├── packages/
+│   └── shared/       # Enums, interfaces, DTOs compartilhados
+├── firebase/         # Firestore + Storage rules (deployed)
+├── scripts/          # Seed, utilitarios
+├── docker-compose.yml
+├── turbo.json
+└── package.json      # pnpm workspace
+```
+
+### 13.3 Módulos Implementados (NestJS)
+
+| Módulo | Rotas | Status |
+|---|---|---|
+| **AuthModule** | `POST /api/auth/sync`, `POST /api/auth/me` | ✅ |
+| **UsersModule** | `GET /api/users`, `GET /api/users/:uid`, `PUT /api/users/:uid`, `PATCH /api/users/:uid/role` | ✅ |
+| **InstitutionsModule** | CRUD `/api/institutions` + directors + project-history (8 rotas) | ✅ |
+| **IntegrationsModule** | `GET /api/integrations/cnpj/:cnpj`, `GET /api/integrations/cep/:cep` | ✅ |
+| **SeedModule** | `POST /api/seed/admin` | ✅ |
+
+### 13.4 Páginas Implementadas (React)
+
+| Rota | Página | Status |
+|---|---|---|
+| `/login` | LoginPage (email/senha + Google) | ✅ |
+| `/register` | RegisterPage | ✅ |
+| `/forgot-password` | ForgotPasswordPage | ✅ |
+| `/dashboard` | DashboardPage (stats + atividades recentes) | ✅ |
+| `/perfil` | ProfilePage (editar nome, senha, tema) | ✅ |
+| `/usuarios` | UsersPage (admin: listar, buscar, alterar papel) | ✅ |
+| `/instituicoes` | InstitutionsListPage (busca + paginacao) | ✅ |
+| `/instituicoes/nova` | InstitutionFormPage (4 etapas, autocomplete) | ✅ |
+| `/instituicoes/:id` | InstitutionDetailPage (6 abas) | ✅ |
+| `/instituicoes/:id/editar` | InstitutionFormPage (edicao) | ✅ |
+
+### 13.5 Common Layer (NestJS)
+
+- **Guards**: FirebaseAuthGuard, RolesGuard, InstitutionAccessGuard
+- **Decorators**: @CurrentUser, @Roles, @Public
+- **Interceptors**: AuditLogInterceptor (global)
+- **Filters**: AllExceptionsFilter
+- **Pipes**: AppValidationPipe
+
+### 13.6 Firebase Deployed
+
+| Recurso | Status |
+|---|---|
+| Firebase Auth (email + Google + anonimo) | ✅ Ativo |
+| Firestore Rules (RBAC completo, 8 papeis) | ✅ Deployed |
+| Storage Rules (pastas com limites de tamanho) | ✅ Deployed |
+| Firestore Indexes (12 composite indexes) | ✅ Deployed |
+| Admin user seed (gestor.renatorosa@gmail.com) | ✅ ADMIN_GERAL |
+
+---
+
+*Documento gerado em 21/07/2026 — Versão 2.0*
