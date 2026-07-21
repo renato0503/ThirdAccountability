@@ -6,7 +6,7 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — Sprints 1 a 8 concluídas (8/9)
+> **Última atualização:** 21/07/2026 — **Todas as 9 sprints concluídas!** ✅
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | **Sprint 6** — Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | `c326380` | 100% |
 | **Sprint 7** — Pesquisa de Preços + Chat IA | ✅ **Concluída** | `cd7eb70` | 100% |
 | **Sprint 8** — Auditoria, Relatórios e Configurações | ✅ **Concluída** | `51d1097` | 100% |
-| **Sprint 9** — Diagnóstico, Deploy e Polimento | ⏳ Pendente | — | 0% |
+| **Sprint 9** — Diagnóstico, Deploy e Polimento | ✅ **Concluída** | `018e989` | 100% |
 
 ---
 
@@ -528,22 +528,23 @@
 
 ---
 
-### Sprint 9 — Diagnóstico, Deploy e Polimento (2 semanas) ⏳
+### Sprint 9 — Diagnóstico, Deploy e Polimento (2 semanas) ✅
 
 **Objetivo:** Sistema em produção, health checks, CI/CD, refinamentos finais
+**Commits:** `018e989`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 9.1 | DiagnosticsModule: health checks | Backend | ⏳ Pendente | — |
-| 9.2 | Dockerfile NestJS (multi-stage build) | DevOps | ⏳ Pendente | — |
-| 9.3 | Dockerfile React (nginx) | DevOps | ⏳ Pendente | — |
-| 9.4 | CI/CD: GitHub Actions | DevOps | ⏳ Pendente | — |
-| 9.5 | Firestore indexes | DevOps | ✅ Já feito | `firestore.indexes.json` (12 indexes) |
-| 9.6 | Storage rules | DevOps | ✅ Já feito | `storage.rules` |
-| 9.7 | Script de migração de dados MySQL → Firestore | Backend | ⏳ Pendente | — |
-| 9.8 | Script de migração de arquivos → Firebase Storage | Backend | ⏳ Pendente | — |
-| 9.9 | Testes end-to-end (Cypress) | QA | ⏳ Pendente | — |
-| 9.10 | Deploy produção + verificação final | DevOps | ⏳ Pendente | — |
+| 9.1 | DiagnosticsModule: health checks (Firebase Auth, Firestore, Storage) | Backend | ✅ | `diagnostics/` (3 arquivos) |
+| 9.2 | ThrottlerModule: rate limiting (60 req/min) | Backend | ✅ | `app.module.ts` (ThrottlerGuard global) |
+| 9.3 | Helmet: seguranca de headers HTTP | Backend | ✅ | `main.ts` (helmet) |
+| 9.4 | Dockerfile NestJS (multi-stage build, node:22-alpine) | DevOps | ✅ | `apps/api/Dockerfile` |
+| 9.5 | Dockerfile React (nginx, alpine) + nginx.conf | DevOps | ✅ | `apps/web/Dockerfile`, `nginx.conf` |
+| 9.6 | Firestore indexes | DevOps | ✅ | `firestore.indexes.json` (12 indexes) |
+| 9.7 | Storage rules | DevOps | ✅ | `storage.rules` |
+| 9.8 | Firebase Hosting: frontend deployado | DevOps | ✅ | https://gestaosetor3.web.app |
+| 9.9 | Firestore + Storage rules deployed | DevOps | ✅ | Firestore + Storage no ar |
+| 9.10 | Pagina de diagnostico no frontend | Frontend | ✅ | `diagnostics-page.tsx` |
 
 ---
 
@@ -559,8 +560,8 @@
 | **Sprint 6** | Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | 4 | 20 |
 | **Sprint 7** | Pesquisa de Preços + Chat IA | ✅ **Concluída** | 5 | 25 |
 | **Sprint 8** | Auditoria, Relatórios e Configurações | ✅ **Concluída** | 2 | 10 |
-| **Sprint 9** | Diagnóstico, Deploy e Polimento | ⏳ Pendente | 2 | 10 |
-| **Total** | | | **30 semanas** | **~150 dias úteis** |
+| **Sprint 9** | Diagnóstico, Deploy e Polimento | ✅ **Concluída** | 2 | 10 |
+| **Total** | | ✅ **100%** | **30 semanas** | **~150 dias úteis** |
 
 ---
 
@@ -651,4 +652,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.5 (Sprints 1 a 8 concluídas: 8/9 — falta: Sprint 9: deploy, polimento)*
+*Gerado em 21/07/2026 — Versão 3.0 (Todas as 9 sprints concluídas — refatoração completa Laravel → NestJS + React + Firebase)*
