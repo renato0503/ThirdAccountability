@@ -29,6 +29,8 @@ Substituir processos fragmentados por um ambiente único que:
 - Estrutura pesquisa de preços com integração PNCP, mercado e IA generativa.
 - Gera relatórios e PDFs prontos para entrega a financiadores.
 
+**Contagem atual:** 46 migrations, 29 models (incl. PriceResearchResult), 32 controllers (incl. Api\ChatIaController), 63 views (incl. chat.blade.php), 7 services (incl. GroqClient, MercadoLivrePriceService).
+
 ## 3. Stack Tecnológica
 
 | Camada | Tecnologia | Versão |
@@ -91,8 +93,8 @@ O sistema segue o padrão MVC (Model-View-Controller) do Laravel, com camadas de
                        │ HTTP/REST
 ┌──────────────────────▼──────────────────────────────────┐
 │                Serviços Externos                         │
-│  BrasilAPI (CNPJ) │ ViaCEP (CEP) │ PNCP (futuro)        │
-│  Groq IA (futuro) │ Asaas (futuro) │ Z-API (futuro)     │
+│  BrasilAPI (CNPJ) │ ViaCEP (CEP) │ PNCP                  │
+│  Groq IA (Llama 3.3) │ Mercado Livre/Zoom/Buscapé │ Asaas (futuro) │ Z-API (futuro) │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -550,12 +552,21 @@ Painel técnico para ADMIN_GERAL:
 
 ### 8.6 Groq IA (Llama 3.3 70B)
 
-- **Service**: `GroqClient` (no ConsultaPublica)
-- Autocomplete de descrições de produtos
+- **Service**: `GroqClient` (`app/Services/GroqClient.php`)
+- Autocomplete de descrições de produtos (`suggestProductDetails`)
 - Padronização de material e categoria CATMAT/CATSER
-- Interpretação de texto livre em lote (extrai múltiplos itens de um parágrafo)
+- Interpretação de texto livre em lote (`interpretBatch` — extrai múltiplos itens de um parágrafo)
+- Integrado ao Chat IA na rota `POST /api/chat-ia/processar`
+- Usa SDK HTTP puro (Laravel Http facade) contra a API REST da Groq
 
-### 8.7 Integrações Planejadas (não implementadas)
+### 8.7 Agregador de Mercado (Mercado Livre + Zoom + Buscapé)
+
+- **Service**: `MercadoLivrePriceService` (`app/Services/PriceResearch/MercadoLivrePriceService.php`)
+- Busca em 3 fontes simultâneas: Mercado Livre API, Zoom (HTML), Buscapé (HTML)
+- Retorna título, preço, URL do vendedor
+- Integrado ao Chat IA para enriquecer cotações com preços de mercado
+
+### 8.8 Integrações Planejadas (não implementadas)
 
 | Serviço | Função | Status |
 |---|---|---|
@@ -565,7 +576,9 @@ Painel técnico para ADMIN_GERAL:
 | Pluggy | Open Finance (conciliação bancária) | Placeholder no `.env.example` |
 | Google Maps | Geolocalização de execução | Planejado |
 
-## 9. Novo Módulo: Chat IA para Pesquisa de Preços
+## 9. Módulo Chat IA para Pesquisa de Preços ✅
+
+> Implementado no commit `168e87d` — Sprint 3 concluída.
 
 ### 9.1 Visão Geral
 
@@ -573,23 +586,23 @@ Este módulo incorpora a tecnologia desenvolvida no projeto ConsultaPublica (`D:
 
 ### 9.2 Problema Específico Resolvido
 
-O módulo atual de Pesquisa de Preços (`PriceResearchController`) funciona de forma assíncrona e discreta: o usuário preenche um formulário, clica em "Buscar" e aguarda resultados. Isso funciona para casos simples, mas falha em cenários onde:
+O módulo anterior de Pesquisa de Preços (`PriceResearchController`) funcionava de forma assíncrona e discreta: o usuário preenchia um formulário, clicava em "Buscar" e aguardava resultados. Isso funcionava para casos simples, mas falhava em cenários onde:
 
-- O usuário precisa cotar múltiplos itens de uma só vez (ex.: "Cota 5 cotações de cada item: Bola MAX 200, Bola de Vôlei Penalty VP500, Rede de Vôlei 4 faixas...")
-- O usuário não sabe o termo exato de busca no PNCP
-- O usuário precisa de padronização de descrição e material (CATMAT/CATSER)
-- O usuário quer um fluxo mais fluido, sem preencher formulários extensos
+- O usuário precisava cotar múltiplos itens de uma só vez (ex.: "Cota 5 cotações de cada item: Bola MAX 200, Bola de Vôlei Penalty VP500, Rede de Vôlei 4 faixas...")
+- O usuário não sabia o termo exato de busca no PNCP
+- O usuário precisava de padronização de descrição e material (CATMAT/CATSER)
+- O usuário queria um fluxo mais fluido, sem preencher formulários extensos
 
 O Chat IA resolve isso permitindo que o usuário escreva em linguagem natural e o sistema:
 
 1. Interpreta o texto via IA e extrai a lista de itens com descrição, quantidade e material.
-2. Busca automaticamente em PNCP + mercado (Zoom + Buscapé) para cada item.
+2. Busca automaticamente em PNCP + Mercado Livre + Zoom + Buscapé para cada item.
 3. Apresenta os resultados em painel visual com cotações ranqueadas.
 4. Permite seleção de cotações válidas (checkboxes) e inclusão de orçamentos manuais.
 
 ### 9.3 Arquitetura do Chat IA
 
-O módulo será implementado como uma API assíncrona dentro do Laravel, com frontend em tempo real via AJAX/SSE.
+O módulo foi implementado como uma API REST dentro do Laravel, com frontend em AJAX e Bootstrap 5.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -705,7 +718,7 @@ O módulo reutiliza as tabelas existentes:
   - `selected` = boolean (checkbox do usuário)
   - `selection_justification` = texto livre
 
-**Novos campos necessários em `price_research_results` (migration):**
+**Novos campos em `price_research_results` (migration `2026_07_20_150000`):**
 
 ```php
 Schema::table('price_research_results', function (Blueprint $table) {
@@ -716,7 +729,7 @@ Schema::table('price_research_results', function (Blueprint $table) {
 });
 ```
 
-### 9.6 API Endpoints (Novos)
+### 9.6 API Endpoints (Implementados)
 
 | Método | Rota | Função |
 |---|---|---|
@@ -883,8 +896,8 @@ PLUGGY_CLIENT_ID=...
 PLUGGY_CLIENT_SECRET=...
 GOOGLE_MAPS_KEY=...
 
-# IA (futuro — Chat IA)
-GROQ_API_KEY=...
+# IA (Chat IA — implementado)
+GROQ_API_KEY=gsk_...
 GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
@@ -911,7 +924,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 - **Filas**: O driver de fila está configurado como `database` (tabela `jobs`), porém nenhum job foi implementado. Todas as operações são síncronas.
 - **Notificações**: O sistema não envia e-mails nem notificações em tempo real. O Mailgun está configurado no `config/mail.php` como fallback, mas sem implementação de `Notification` classes ou `Mail` classes.
 - **Cache Redis**: Configurado como opcional, mas não implementado. Atualmente usando file cache.
-- **Integrações**: As chaves de API para Asaas, Z-API, D4Sign, Pluggy e Groq existem como placeholders no `.env.example`, mas nenhuma integração está implementada além de BrasilAPI e ViaCEP.
+- **Integrações**: As chaves de API para Asaas, Z-API, D4Sign, Pluggy existem como placeholders no `.env.example`, mas nenhuma integração está implementada além de BrasilAPI, ViaCEP, PNCP e Groq IA.
 
 ### 12.2 Padrões de Código
 
@@ -931,7 +944,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ### 12.4 Próximos Passos Prioritários
 
-1. **Implementar Chat IA** (módulo descrito na seção 9) — integrar Groq SDK + PNCP + mercado no fluxo conversacional
+1. **Deploy em produção** — contatar cliente (FTP/SSH), enviar ao servidor, rodar migrations
 2. **Escrever testes** — começar com feature tests para os controllers principais (ProjectController, PriceResearchController)
 3. **Implementar filas** — migrar buscas PNCP e mercado para jobs assíncronos
 4. **Notificações** — implementar Notifications do Laravel para diligências e aprovações
