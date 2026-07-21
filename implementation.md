@@ -18,16 +18,18 @@
 
 | Item | Status | Observação |
 |---|---|---|
-| **Git + repositório remoto** | ❌ | Criar repo privado GitHub, subir código |
-| **Contato com cliente** (FTP, DNS, banco) | ❌ | Ver checklist.md |
+| **Git + repositório remoto** | ✅ | GitHub: renato0503/ThirdAccountability |
+| **Contato com cliente** (FTP, DNS, banco) | ❌ | Ver checklist.md — pendente |
 | **Testar conexão com banco remoto** | ❌ | Confirmar Dbaas ativo |
 | **Deploy manual funcional** | ❌ | FTP/SSH para production.byrees.com |
-| **Configurar .env de produção** | 🔶 | Parcial — falta MAIL, API keys |
-| **Obter API Key Groq** | ❌ | Necessário para o Chat IA |
+| **Configurar .env de produção** | 🔶 | Parcial — falta MAIL, API keys restantes |
+| **Obter API Key Groq** | ✅ | Chave adicionada no `.env` local |
 | **Configurar SSL / HTTPS** | ✅ | Já ativo no servidor |
 | **Storage link funcional** | ✅ | `public/storage` → `storage/app/public` |
 | **DiagnosticController** | ✅ | Migrations, caches, storage link |
 | **Limpeza de lixo** (pastas `lixo/`) | ❌ | Remover diretórios obsoletos |
+| **.gitignore configurado** | ✅ | `.claude/`, `storage/framework/views/`, `error_log`, `.tar.gz`, `.env` |
+| **Credenciais vazadas sanitizadas** | ✅ | unlock_db.php, _create_admin_user.php, _pw_mkuser.php, .claude/settings.local.json |
 
 ---
 
@@ -39,7 +41,7 @@
 |---|---|---|
 | **Package.json / Vite** | ❌ | Frontend usa Bootstrap 5 via CDN — funcional, mas sem build |
 | **Configurar Vite + assets** | 🔶 | Opcional — considerar se precisar de JS moderno |
-| **Criar `routes/api.php`** | ❌ | Necessário para Chat IA |
+| **Criar `routes/api.php`** | ✅ | Criado com 4 endpoints do Chat IA |
 | **Verificar e corrigir views/projects/show.blade.php** | 🔶 | Backup existente (`show.blade.php.bak`) |
 | **Verificar views/pdf/ duplicadas** | 🔶 | Backups `.bak` em pdf/ |
 | **Testar todas as rotas CRUD manualmente** | ❌ | Validar se quebrou algo |
@@ -49,41 +51,44 @@
 
 ---
 
-## Sprint 3 — Chat IA (Módulo Novo)
+## Sprint 3 — Chat IA (Módulo Novo) ✅
 
 > Objetivo: implementar o assistente conversacional para pesquisa de preços
+> **Commit:** `168e87d` — todos os itens concluídos
 
 ### Backend
 
-| Item | Status | Estimativa |
+| Item | Status | Arquivo |
 |---|---|---|
-| **Criar `ChatIaController`** | ❌ | 1 dia |
-| **POST `/api/chat-ia/processar`** | ❌ | 1 dia |
-| **POST `/api/chat-ia/selecionar`** | ❌ | ½ dia |
-| **POST `/api/chat-ia/orcamento-manual`** | ❌ | 1 dia |
-| **GET `/api/chat-ia/status/{id}`** | ❌ | ½ dia |
-| **Criar `GroqClient` service** | ❌ | 1 dia |
-| **Criar migration campos extras (`price_research_results`)** | ❌ | ½ dia |
-| **Integrar Groq IA (interpretação de lote)** | ❌ | 2 dias |
-| **Busca paralela PNCP + mercado** | ❌ | 1 dia |
-| **Upload de anexos (orçamento manual)** | ❌ | 1 dia |
-| **AuditLog para ações do chat** | ❌ | ½ dia |
-| **Criar rotas em `routes/api.php`** | ❌ | ½ dia |
+| **Criar `ChatIaController`** | ✅ | `app/Http/Controllers/Api/ChatIaController.php` |
+| **POST `/api/chat-ia/processar`** | ✅ | `ChatIaController::processar()` — interpreta texto com Groq + busca PNCP/Mercado |
+| **POST `/api/chat-ia/selecionar`** | ✅ | `ChatIaController::selecionar()` — marca/desmarca cotação |
+| **POST `/api/chat-ia/orcamento-manual`** | ✅ | `ChatIaController::orcamentoManual()` — adiciona orçamento com upload |
+| **GET `/api/chat-ia/status/{id}`** | ✅ | `ChatIaController::status()` — retorna status da pesquisa |
+| **Criar `GroqClient` service** | ✅ | `app/Services/GroqClient.php` — interpretação + sugestão de produtos |
+| **Criar migration campos extras** | ✅ | `database/migrations/2026_07_20_150000_...` (cnpj_fornecedor, item_descricao, anexo_path, observacoes) |
+| **Integrar Groq IA (interpretação de lote)** | ✅ | Via `GroqClient::interpretBatch()` |
+| **Busca paralela PNCP + mercado** | ✅ | PNCP (PncpPriceService) + Mercado (MercadoLivrePriceService) |
+| **Upload de anexos (orçamento manual)** | ✅ | Salvo em `storage/app/public/orcamentos-manuais/` |
+| **AuditLog para ações do chat** | ✅ | Ações: CHAT_IA_PROCESSAR, CHAT_IA_SELECIONAR, CHAT_IA_DESELECIONAR, CHAT_IA_ORCAMENTO_MANUAL |
+| **Criar rotas em `routes/api.php`** | ✅ | 4 rotas prefixadas `/api/chat-ia` |
+| **Criar `MercadoLivrePriceService`** | ✅ | `app/Services/PriceResearch/MercadoLivrePriceService.php` — busca em ML API + Zoom + Buscapé |
+| **Ativar API routing** | ✅ | `bootstrap/app.php` — adicionado `api:` no `withRouting` |
 
 ### Frontend
 
-| Item | Status | Estimativa |
+| Item | Status | Arquivo |
 |---|---|---|
-| **Interface de chat (campo texto + botão)** | ❌ | 1 dia |
-| **Painel de resultados (cards por item)** | ❌ | 2 dias |
-| **Tabela cotações PNCP + mercado** | ❌ | 1 dia |
-| **Checkbox de seleção por cotação** | ❌ | ½ dia |
-| **Modal "Adicionar Orçamento Manual"** | ❌ | 1 dia |
-| **Máscara CNPJ + autocomplete BrasilAPI** | 🔶 | BrasilAPI já existe, integrar |
-| **Upload de arquivo com preview** | ❌ | ½ dia |
-| **Modal de finalização + justificativa** | ❌ | 1 dia |
-| **Indicador de loading / feedback visual** | ❌ | ½ dia |
-| **Integração com PDF existente** | 🔶 | PDF de price-research já existe |
+| **Interface de chat (campo texto + botão)** | ✅ | `resources/views/price-research/chat.blade.php` |
+| **Painel de resultados (cards por item)** | ✅ | Renderização dinâmica com estats por item |
+| **Tabela cotações PNCP + mercado** | ✅ | Exibe fonte, descrição, valor, fornecedor |
+| **Checkbox de seleção por cotação** | ✅ | Toggle com refresh automático via AJAX |
+| **Modal "Adicionar Orçamento Manual"** | ✅ | CNPJ + descrição + valor + anexo |
+| **Máscara CNPJ + autocomplete BrasilAPI** | ✅ | Auto-preenchimento de razão social via BrasilAPI |
+| **Upload de arquivo com preview** | ✅ | Preview de imagem antes de salvar |
+| **Modal de finalização + justificativa** | ✅ | Redireciona para editar + finalizar pesquisa |
+| **Indicador de loading / feedback visual** | ✅ | Spinner + mensagem durante processamento |
+| **Sidebar link** | ✅ | Link "Chat IA (Cotação)" na navegação principal |
 
 ---
 
@@ -149,8 +154,8 @@
 | **ViaCEP (CEP)** | ✅ | Funcionando com cache 24h |
 | **PNCP (Portal Nacional de Contratações)** | 🔶 | Service criado, testar integração real |
 | **Radar TCE-MT** | 🔶 | Service criado, testar integração real |
-| **Agregador Mercado (Zoom + Buscapé)** | 🔶 | Service criado, testar scraping |
-| **Groq IA** | ❌ | SDK + Chat IA (Sprint 3) |
+| **Agregador Mercado (Zoom + Buscapé + ML API)** | ✅ | `MercadoLivrePriceService` implementado e integrado ao Chat IA |
+| **Groq IA (Llama 3.3 70B)** | ✅ | `GroqClient` implementado — interpretBatch + suggestProductDetails |
 | **Asaas (pagamentos)** | ❌ | Placeholder no env |
 | **Z-API (WhatsApp)** | ❌ | Placeholder no env |
 | **D4Sign (assinatura digital)** | ❌ | Placeholder no env |
@@ -182,18 +187,20 @@
 
 | Sprint | Estimativa | Descrição |
 |---|---|---|
-| **Sprint 1 — Fundação** | 2–3 dias | Git, deploy, contato cliente, API keys |
-| **Sprint 2 — Correções** | 3–5 dias | Estabilizar código existente |
-| **Sprint 3 — Chat IA** | 12–15 dias | Módulo principal novo |
-| **Sprint 4 — Testes** | 5–7 dias | Cobertura básica dos controllers |
-| **Sprint 5 — Filas** | 3–4 dias | Jobs assíncronos |
-| **Sprint 6 — Notificações** | 2–3 dias | E-mails reais |
-| **Sprint 7 — Integrações** | 5–7 dias | APIs restantes |
-| **Sprint 8 — Polimento** | 3–5 dias | UX e refinamentos |
+| Sprint | Status | Estimativa | Descrição |
+|---|---|---|---|---|
+| **Sprint 1 — Fundação** | 🔶 80% | 2–3 dias | Git, deploy, contato cliente, API keys |
+| **Sprint 2 — Correções** | 🔶 30% | 3–5 dias | Estabilizar código existente |
+| **Sprint 3 — Chat IA** | ✅ 100% | 12–15 dias | Módulo principal novo |
+| **Sprint 4 — Testes** | ❌ | 5–7 dias | Cobertura básica dos controllers |
+| **Sprint 5 — Filas** | ❌ | 3–4 dias | Jobs assíncronos |
+| **Sprint 6 — Notificações** | ❌ | 2–3 dias | E-mails reais |
+| **Sprint 7 — Integrações** | 🔶 50% | 5–7 dias | APIs restantes |
+| **Sprint 8 — Polimento** | ❌ | 3–5 dias | UX e refinamentos |
 
-**Total estimado:** ~35–50 dias úteis (2–3 meses) para **sistema 100% funcional** com todos os módulos operacionais, testados e em produção.
+**Total estimado restante:** ~20–30 dias úteis (1–2 meses) para **sistema 100%**.
 
-**Mínimo viável para voltar ao ar:** Sprint 1 + Sprint 2 (~1 semana) — sistema já roda, só precisa de deploy estável e contato com cliente.
+**Sistema operacional atual:** Backend funcional com todos os módulos CRUD + Chat IA integrado.
 
 ---
 
