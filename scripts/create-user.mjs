@@ -1,7 +1,7 @@
 import { GoogleAuth } from 'google-auth-library';
 
-const PROJECT_ID = 'gestaosetor3';
-const API_KEY = 'AIzaSyDyUHPkkKqBjLFUSgk8iYb8eYM1YQ4kFt4';
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'gestaosetor3';
+const API_KEY = process.env.FIREBASE_API_KEY; // Leia de .env ou variavel de ambiente
 
 async function getToken() {
   const auth = new GoogleAuth({

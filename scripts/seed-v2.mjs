@@ -5,7 +5,8 @@ const UID = 'wFBPza3O3CRouLoybF2lHregGb52';
 const EMAIL = 'gestor.renatorosa@gmail.com';
 const NAME = 'Renato Rosa';
 const ROLE = 'ADMIN_GERAL';
-const PROJECT_ID = 'gestaosetor3';
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'gestaosetor3';
+const API_KEY = process.env.FIREBASE_API_KEY;
 
 async function getAccessToken() {
   // Try gcloud ADC first
@@ -42,7 +43,7 @@ async function run() {
 
   // 1. Set custom claims via Firebase Auth REST API
   try {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDyUHPkkKqBjLFUSgk8iYb8eYM1YQ4kFt4`;
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${API_KEY}`;
     const body = {
       localId: UID,
       customAttributes: JSON.stringify({ role: ROLE, institution_id: null }),
@@ -99,7 +100,7 @@ async function run() {
 
   // 3. Verify
   try {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDyUHPkkKqBjLFUSgk8iYb8eYM1YQ4kFt4`;
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${API_KEY}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
