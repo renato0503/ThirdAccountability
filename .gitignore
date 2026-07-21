@@ -48,6 +48,7 @@ packages/*/dist/
 apps/*/.env
 apps/*/.env.local
 apps/*/.env.*.local
+apps/*/.env.production
 
 # Monorepo — Next.js (futuro)
 apps/web/.next/
