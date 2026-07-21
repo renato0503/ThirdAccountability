@@ -6,6 +6,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 8000,
 });
 
 // Interceptor: adiciona token de autenticacao em todas as requisicoes
@@ -25,9 +26,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const user = auth.currentUser;
       if (user) {
-        // Tenta renovar o token
         await user.getIdToken(true);
-        // Re-tenta a requisicao original
         const token = await user.getIdToken();
         error.config.headers.Authorization = `Bearer ${token}`;
         return api(error.config);
@@ -43,13 +42,25 @@ export default api;
 
 export async function syncUser() {
   const user = auth.currentUser;
-  if (!user) throw new Error('Usuario nao autenticado');
+  if (!user) return null;
+
   const token = await user.getIdToken();
-  const { data } = await api.post('/auth/sync', { token });
-  return data;
+
+  try {
+    const { data } = await api.post('/auth/sync', { token });
+    return data;
+  } catch {
+    // API nao disponivel — login funciona apenas com Firebase Auth
+    // O documento users/{uid} sera criado quando a API estiver no ar
+    return null;
+  }
 }
 
 export async function getMe() {
-  const { data } = await api.post('/auth/me');
-  return data;
+  try {
+    const { data } = await api.post('/auth/me');
+    return data;
+  } catch {
+    return null;
+  }
 }

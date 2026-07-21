@@ -4,6 +4,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { InstitutionsModule } from './modules/institutions/institutions.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { FundingSourcesModule } from './modules/funding-sources/funding-sources.module';
 import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
@@ -13,9 +15,9 @@ import { SeedModule } from './modules/seed/seed.module';
     UsersModule,
     InstitutionsModule,
     IntegrationsModule,
+    ProjectsModule,
+    FundingSourcesModule,
     SeedModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

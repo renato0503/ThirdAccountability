@@ -10,6 +10,9 @@ import { UsersPage } from '@/features/users/users-page';
 import { InstitutionsListPage } from '@/features/institutions/institutions-list-page';
 import { InstitutionFormPage } from '@/features/institutions/institution-form-page';
 import { InstitutionDetailPage } from '@/features/institutions/institution-detail-page';
+import { ProjectsListPage } from '@/features/projects/projects-list-page';
+import { ProjectFormPage } from '@/features/projects/project-form-page';
+import { ProjectDetailPage } from '@/features/projects/project-detail-page';
 
 export const router = createBrowserRouter([
   {
@@ -40,18 +43,10 @@ export const router = createBrowserRouter([
       { path: 'instituicoes/nova', element: <InstitutionFormPage /> },
       { path: 'instituicoes/:id', element: <InstitutionDetailPage /> },
       { path: 'instituicoes/:id/editar', element: <InstitutionFormPage /> },
-      {
-        path: 'projetos',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo de Projetos — Sprint 4</div>,
-      },
-      {
-        path: 'projetos/novo',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Novo Projeto — Sprint 4</div>,
-      },
-      {
-        path: 'projetos/:id',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Detalhes do Projeto — Sprint 4</div>,
-      },
+      { path: 'projetos', element: <ProjectsListPage /> },
+      { path: 'projetos/novo', element: <ProjectFormPage /> },
+      { path: 'projetos/:id', element: <ProjectDetailPage /> },
+      { path: 'projetos/:id/editar', element: <ProjectFormPage /> },
       {
         path: 'financeiro',
         element: <div className="flex items-center justify-center h-full text-muted-foreground">Modulo Financeiro — Sprint 5</div>,
