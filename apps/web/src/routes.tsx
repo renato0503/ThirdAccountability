@@ -18,6 +18,8 @@ import { ExpenseFormPage } from '@/features/expenses/expense-form-page';
 import { DocumentsPage } from '@/features/documents/documents-page';
 import { DiligencesPage } from '@/features/diligences/diligences-page';
 import { AccountingPage } from '@/features/accounting/accounting-page';
+import { PriceResearchListPage } from '@/features/price-research/price-research-list-page';
+import { ChatIaPage } from '@/features/price-research/chat-ia-page';
 
 export const router = createBrowserRouter([
   {
@@ -57,14 +59,8 @@ export const router = createBrowserRouter([
       { path: 'documentos', element: <DocumentsPage /> },
       { path: 'diligencias', element: <DiligencesPage /> },
       { path: 'prestacao-contas', element: <AccountingPage /> },
-      {
-        path: 'pesquisa-precos',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Pesquisa de Precos — Sprint 7</div>,
-      },
-      {
-        path: 'pesquisa-precos/chat-ia',
-        element: <div className="flex items-center justify-center h-full text-muted-foreground">Chat IA (Cotacao) — Sprint 7</div>,
-      },
+      { path: 'pesquisa-precos', element: <PriceResearchListPage /> },
+      { path: 'pesquisa-precos/chat-ia', element: <ChatIaPage /> },
       {
         path: 'auditoria',
         element: <div className="flex items-center justify-center h-full text-muted-foreground">Auditoria — Sprint 8</div>,
