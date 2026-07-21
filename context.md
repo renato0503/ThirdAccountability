@@ -981,13 +981,16 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ## 13. Nova Arquitetura — Status das Sprints
 
-### 13.1 Sprints Concluídas (3 de 9)
+### 13.1 Sprints Concluídas (6 de 9)
 
 | Sprint | Módulos | Commits | Status |
 |---|---|---|---|
-| **Sprint 1** | Fundação e Setup | `5513db9` | ✅ **100%** |
+| **Sprint 1** | Fundação e Setup | `5513db9`, `c13210e` | ✅ **100%** |
 | **Sprint 2** | Autenticação e Usuários | `0b2fb2c` | ✅ **100%** |
 | **Sprint 3** | Instituições | `e624d7a`, `008a81d` | ✅ **100%** |
+| **Sprint 4** | Projetos | `9bb5621` | ✅ **100%** |
+| **Sprint 5** | Metas, Atividades e Despesas | `551771a` | ✅ **100%** |
+| **Sprint 6** | Documentos, Diligências e Prestação de Contas | `c326380` | ✅ **100%** |
 
 ### 13.2 Estrutura do Monorepo
 
@@ -1014,6 +1017,14 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | **InstitutionsModule** | CRUD `/api/institutions` + directors + project-history (8 rotas) | ✅ |
 | **IntegrationsModule** | `GET /api/integrations/cnpj/:cnpj`, `GET /api/integrations/cep/:cep` | ✅ |
 | **SeedModule** | `POST /api/seed/admin` | ✅ |
+| **ProjectsModule** | CRUD `/api/projects` + generate-code + sub-entities (12 rotas) | ✅ |
+| **FundingSourcesModule** | CRUD `/api/funding-sources` | ✅ |
+| **GoalsModule** | CRUD `/api/projects/:id/goals` + workflow (9 rotas) | ✅ |
+| **ExpensesModule** | CRUD `/api/projects/:id/expenses` + status workflow | ✅ |
+| **BudgetItemsModule** | CRUD `/api/projects/:id/budget-items` | ✅ |
+| **DocumentsModule** | CRUD `/api/projects/:id/documents` + Firebase Storage | ✅ |
+| **DiligencesModule** | CRUD `/api/projects/:id/diligences` + respond/close/reopen | ✅ |
+| **AccountingModule** | CRUD `/api/projects/:id/accounting` + photos | ✅ |
 
 ### 13.4 Páginas Implementadas (React)
 
@@ -1029,6 +1040,15 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | `/instituicoes/nova` | InstitutionFormPage (4 etapas, autocomplete) | ✅ |
 | `/instituicoes/:id` | InstitutionDetailPage (6 abas) | ✅ |
 | `/instituicoes/:id/editar` | InstitutionFormPage (edicao) | ✅ |
+| `/projetos` | ProjectsListPage (filtros + busca) | ✅ |
+| `/projetos/novo` | ProjectFormPage (wizard 6 etapas) | ✅ |
+| `/projetos/:id` | ProjectDetailPage (5 abas + metas + financeiro) | ✅ |
+| `/projetos/:id/editar` | ProjectFormPage (edicao) | ✅ |
+| `/financeiro` | ExpensesListPage (filtro status + acao inline) | ✅ |
+| `/despesas/nova` | ExpenseFormPage | ✅ |
+| `/documentos` | DocumentsPage (grid + upload Firebase Storage) | ✅ |
+| `/diligencias` | DiligencesPage (timeline + resposta + parecer) | ✅ |
+| `/prestacao-contas` | AccountingPage (relatorios + fotos) | ✅ |
 
 ### 13.5 Common Layer (NestJS)
 
@@ -1047,7 +1067,9 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | Storage Rules (pastas com limites de tamanho) | ✅ Deployed |
 | Firestore Indexes (12 composite indexes) | ✅ Deployed |
 | Admin user seed (gestor.renatorosa@gmail.com) | ✅ ADMIN_GERAL |
+| Admin user seed (cleitonxadrez@gmail.com) | ✅ ADMIN_GERAL |
+| Firebase Hosting | ✅ https://gestaosetor3.web.app |
 
 ---
 
-*Documento gerado em 21/07/2026 — Versão 2.0*
+*Documento gerado em 21/07/2026 — Versão 2.1 (6 sprints concluídas)*

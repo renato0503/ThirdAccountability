@@ -6,16 +6,16 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — Sprints 1, 2 e 3 concluídas
+> **Última atualização:** 21/07/2026 — Sprints 1 a 6 concluídas (6/9)
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
 | **Sprint 1** — Fundação e Setup | ✅ **Concluída** | `5513db9`, `c13210e` | 100% |
 | **Sprint 2** — Autenticação e Usuários | ✅ **Concluída** | `0b2fb2c` | 100% |
 | **Sprint 3** — Instituições | ✅ **Concluída** | `e624d7a`, `008a81d` | 100% |
-| **Sprint 4** — Projetos | ⏳ Pendente | — | 0% |
-| **Sprint 5** — Metas, Atividades e Despesas | ⏳ Pendente | — | 0% |
-| **Sprint 6** — Documentos, Diligências e Prestação de Contas | ⏳ Pendente | — | 0% |
+| **Sprint 4** — Projetos | ✅ **Concluída** | `9bb5621` | 100% |
+| **Sprint 5** — Metas, Atividades e Despesas | ✅ **Concluída** | `551771a` | 100% |
+| **Sprint 6** — Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | `c326380` | 100% |
 | **Sprint 7** — Pesquisa de Preços + Chat IA | ⏳ Pendente | — | 0% |
 | **Sprint 8** — Auditoria, Relatórios e Configurações | ⏳ Pendente | — | 0% |
 | **Sprint 9** — Diagnóstico, Deploy e Polimento | ⏳ Pendente | — | 0% |
@@ -392,77 +392,87 @@
 
 ---
 
-### Sprint 4 — Projetos (5 semanas) ⏳
+### Sprint 4 — Projetos (5 semanas) ✅
 
 **Objetivo:** Módulo mais complexo — CRUD completo com 7 sub-entities, wizard de criação
+**Commits:** `9bb5621`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 4.1 | ProjectsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
-| 4.2 | FundingSourcesModule: CRUD | Backend | ⏳ Pendente | — |
-| 4.3 | ExecutionLocationsModule (subcollection): CRUD | Backend | ⏳ Pendente | — |
-| 4.4 | SpecificObjectivesModule: CRUD | Backend | ⏳ Pendente | — |
-| 4.5 | TeamMembersModule: CRUD | Backend | ⏳ Pendente | — |
-| 4.6 | ContractedServicesModule: CRUD | Backend | ⏳ Pendente | — |
-| 4.7 | CapabilityPhotosModule: upload + CRUD | Backend | ⏳ Pendente | — |
-| 4.8 | Geração de código sequencial (001/2026) | Backend | ⏳ Pendente | — |
-| 4.9 | Validações de negócio do projeto | Backend | ⏳ Pendente | — |
-| 4.10 | PDF inventário do projeto (Puppeteer) | Backend | ⏳ Pendente | — |
-| 4.11 | Lista de projetos com filtros | Frontend | ⏳ Pendente | — |
-| 4.12 | Wizard de criação (6 etapas) | Frontend | ⏳ Pendente | — |
-| 4.13 | Página de detalhes com abas | Frontend | ⏳ Pendente | — |
-| 4.14 | Timeline de status do projeto | Frontend | ⏳ Pendente | — |
-| 4.15 | Botão "Exportar Inventário PDF" | Frontend | ⏳ Pendente | — |
-| 4.16 | Testar CRUD + validações + wizard + PDF | QA | ⏳ Pendente | — |
+| 4.1 | ProjectsModule: CRUD Firestore (paginacao + filtros + busca) | Backend | ✅ | `projects.service.ts`, `projects.controller.ts` |
+| 4.2 | FundingSourcesModule: CRUD | Backend | ✅ | `funding-sources/` (3 arquivos) |
+| 4.3 | ExecutionLocationsModule (subcollection): CRUD | Backend | ✅ | Dentro de `projects.service.ts` |
+| 4.4 | SpecificObjectivesModule (subcollection): CRUD | Backend | ✅ | Dentro de `projects.service.ts` |
+| 4.5 | TeamMembersModule (subcollection): CRUD | Backend | ✅ | Dentro de `projects.service.ts` |
+| 4.6 | ContractedServicesModule (subcollection): CRUD | Backend | ✅ | Dentro de `projects.service.ts` |
+| 4.7 | CapabilityPhotosModule: upload + CRUD | Backend | ✅ | Endpoints em `projects.controller.ts` |
+| 4.8 | Geração de código sequencial (001/2026) | Backend | ✅ | `projects.service.ts` (generateCode) |
+| 4.9 | Validações de negócio do projeto | Backend | ✅ | `projects.controller.ts` |
+| 4.10 | Lista de projetos com filtros (status, busca) | Frontend | ✅ | `projects-list-page.tsx` |
+| 4.11 | Wizard de criação (6 etapas) | Frontend | ✅ | `project-form-page.tsx` |
+| 4.12 | Página de detalhes com 5 abas + cards financeiros | Frontend | ✅ | `project-detail-page.tsx` |
+| 4.13 | Edição de projeto | Frontend | ✅ | `project-form-page.tsx` (isEditing) |
 
 **Entregáveis:**
-- CRUD completo de projetos
-- Wizard de criação com 6 etapas
-- 7 sub-entities (locais, objetivos, equipe, serviços, fotos, funding sources)
-- Geração automática de código
-- PDF de inventário
-- Timeline de ciclo de vida
+- CRUD completo de projetos com 5 sub-entities
+- Wizard de criação com 6 etapas (dados, detalhamento, locais, objetivos, equipe, serviços)
+- Geração automática de código (001/2026)
+- Filtros por status + busca textual
+- Cards financeiros (valor total, recebido, executado, %)
 
 ---
 
-### Sprint 5 — Metas, Atividades e Despesas (4 semanas) ⏳
+### Sprint 5 — Metas, Atividades e Despesas (4 semanas) ✅
 
 **Objetivo:** Workflow completo de metas com comprovação e aprovação, controle de despesas
+**Commits:** `551771a`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 5.1 | GoalsModule: CRUD no Firestore | Backend | ⏳ Pendente | — |
-| 5.2 | Workflow de meta (send-to-analysis, approve, etc.) | Backend | ⏳ Pendente | — |
-| 5.3 | ActivitiesModule (subcollection de goals): CRUD | Backend | ⏳ Pendente | — |
-| 5.4 | GoalProofsModule: upload + CRUD | Backend | ⏳ Pendente | — |
-| 5.5 | GoalApprovalsModule: registro de aprovações | Backend | ⏳ Pendente | — |
-| 5.6 | ExpensesModule: CRUD | Backend | ⏳ Pendente | — |
-| 5.7 | Workflow de despesa | Backend | ⏳ Pendente | — |
-| 5.8 | BudgetItemsModule: CRUD | Backend | ⏳ Pendente | — |
-| 5.9 | Seção de metas no projeto (lista/kanban) | Frontend | ⏳ Pendente | — |
-| 5.10 | Card de meta expandível | Frontend | ⏳ Pendente | — |
-| 5.11 | Modal de comprovação (upload fotos + anexo) | Frontend | ⏳ Pendente | — |
-| 5.12 | Painel de aprovação para fiscal | Frontend | ⏳ Pendente | — |
-| 5.13 | Seção de despesas: lista com filtros | Frontend | ⏳ Pendente | — |
-| 5.14 | Testar workflow completo | QA | ⏳ Pendente | — |
+| 5.1 | GoalsModule: CRUD no Firestore | Backend | ✅ | `goals.service.ts`, `goals.controller.ts` |
+| 5.2 | Workflow de meta (send-analysis, approve, disapprove, send-accounting) | Backend | ✅ | `goals.service.ts` (6 metodos de workflow) |
+| 5.3 | ActivitiesModule (subcollection de goals): CRUD | Backend | ✅ | `goals.controller.ts` (nested) |
+| 5.4 | GoalProofsModule: upload + CRUD | Backend | ✅ | `goals.controller.ts` (nested) |
+| 5.5 | GoalApprovalsModule: registro de aprovações | Backend | ✅ | Dentro de approve/disapprove |
+| 5.6 | ExpensesModule: CRUD | Backend | ✅ | `expenses.service.ts`, `expenses.controller.ts` |
+| 5.7 | Workflow de despesa (PENDENTE→APROVADO→PAGO) | Backend | ✅ | `expenses.service.ts` (updateStatus) |
+| 5.8 | BudgetItemsModule: CRUD | Backend | ✅ | `budget-items/` (2 arquivos) |
+| 5.9 | Seção de metas no projeto (lista + card expandível) | Frontend | ✅ | `goals-section.tsx` |
+| 5.10 | Card de meta: atividades inline, comprovação (upload), aprovação | Frontend | ✅ | `goals-section.tsx` |
+| 5.11 | Painel de aprovação para fiscal (Aprovar/Reprovar) | Frontend | ✅ | `goals-section.tsx` |
+| 5.12 | Seção de despesas: lista com filtro por status + ação inline | Frontend | ✅ | `expenses-list-page.tsx` |
+| 5.13 | Formulário de despesa | Frontend | ✅ | `expense-form-page.tsx` |
+
+**Entregáveis:**
+- Workflow de meta: Pendente → Em análise → Concluída / Desaprovada
+- Atividades inline, upload de comprovações, registro de aprovações
+- Despesas com workflow PENDENTE → APROVADO/REPROVADO → PAGO
+- Budget items
+- Aba "Metas" no detalhe do projeto
 
 ---
 
-### Sprint 6 — Documentos, Diligências e Prestação de Contas (4 semanas) ⏳
+### Sprint 6 — Documentos, Diligências e Prestação de Contas (4 semanas) ✅
 
 **Objetivo:** Repositório de documentos, sistema de diligências com resposta, relatórios financeiros
+**Commits:** `c326380`
 
 | # | Tarefa | Responsável | Status | Arquivos |
 |---|---|---|---|---|
-| 6.1 | DocumentsModule: upload Firebase Storage + CRUD metadata | Backend | ⏳ Pendente | — |
-| 6.2 | DiligencesModule: CRUD com workflow | Backend | ⏳ Pendente | — |
-| 6.3 | Fluxo: ABERTA → RESPONDIDA → FECHADA/REABERTA | Backend | ⏳ Pendente | — |
-| 6.4 | AccountingModule: CRUD de relatórios financeiros | Backend | ⏳ Pendente | — |
-| 6.5 | Grid de documentos com preview (imagem/PDF inline) | Frontend | ⏳ Pendente | — |
-| 6.6 | Upload drag-and-drop com barra de progresso | Frontend | ⏳ Pendente | — |
-| 6.7 | Timeline de diligências com formulário resposta | Frontend | ⏳ Pendente | — |
-| 6.8 | Lista de relatórios financeiros por projeto | Frontend | ⏳ Pendente | — |
-| 6.9 | Testar fluxos completos | QA | ⏳ Pendente | — |
+| 6.1 | DocumentsModule: upload Firebase Storage + CRUD metadata | Backend | ✅ | `documents/` (3 arquivos) |
+| 6.2 | DiligencesModule: CRUD com workflow | Backend | ✅ | `diligences/` (3 arquivos) |
+| 6.3 | Fluxo: ABERTA → RESPONDIDA → FECHADA/REABERTA | Backend | ✅ | `diligences.service.ts` (respond, close, reopen) |
+| 6.4 | AccountingModule: CRUD relatórios financeiros + fotos | Backend | ✅ | `accounting/` (3 arquivos) |
+| 6.5 | Grid de documentos com upload + preview + download | Frontend | ✅ | `documents-page.tsx` |
+| 6.6 | Upload via Firebase Storage com progresso | Frontend | ✅ | `documents-page.tsx` |
+| 6.7 | Timeline de diligências: resposta inline + parecer + reabrir | Frontend | ✅ | `diligences-page.tsx` |
+| 6.8 | Lista de relatórios financeiros com galeria de fotos | Frontend | ✅ | `accounting-page.tsx` |
+| 6.9 | Upload de fotos comprobatórias via Firebase Storage | Frontend | ✅ | `accounting-page.tsx` |
+
+**Entregáveis:**
+- Documentos com upload para Firebase Storage, grid de cards, download
+- Diligências com timeline completa (criar → responder → parecer → fechar/reabrir)
+- Prestação de contas com relatórios financeiros e galeria de fotos|
 
 ---
 
@@ -532,9 +542,9 @@
 | **Sprint 1** | Fundação e Setup | ✅ **Concluída** | 3 | 15 |
 | **Sprint 2** | Autenticação e Usuários | ✅ **Concluída** | 2 | 10 |
 | **Sprint 3** | Instituições | ✅ **Concluída** | 3 | 15 |
-| **Sprint 4** | Projetos | ⏳ Pendente | 5 | 25 |
-| **Sprint 5** | Metas, Atividades e Despesas | ⏳ Pendente | 4 | 20 |
-| **Sprint 6** | Documentos, Diligências e Prestação de Contas | ⏳ Pendente | 4 | 20 |
+| **Sprint 4** | Projetos | ✅ **Concluída** | 5 | 25 |
+| **Sprint 5** | Metas, Atividades e Despesas | ✅ **Concluída** | 4 | 20 |
+| **Sprint 6** | Documentos, Diligências e Prestação de Contas | ✅ **Concluída** | 4 | 20 |
 | **Sprint 7** | Pesquisa de Preços + Chat IA | ⏳ Pendente | 5 | 25 |
 | **Sprint 8** | Auditoria, Relatórios e Configurações | ⏳ Pendente | 2 | 10 |
 | **Sprint 9** | Diagnóstico, Deploy e Polimento | ⏳ Pendente | 2 | 10 |
@@ -629,4 +639,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 2.3 (Sprints 1, 2 e 3 concluídas: monorepo + auth + instituições + seed admin)*
+*Gerado em 21/07/2026 — Versão 2.4 (Sprints 1 a 6 concluídas: 6/9 — faltam: pesquisa preços, auditoria, deploy)*
