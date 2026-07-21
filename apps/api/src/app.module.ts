@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { FirebaseModule } from './firebase.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -18,10 +20,12 @@ import { AuditModule } from './modules/audit/audit.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
 import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     FirebaseModule, AuthModule, UsersModule,
     InstitutionsModule, IntegrationsModule,
     ProjectsModule, FundingSourcesModule,
@@ -29,7 +33,11 @@ import { SeedModule } from './modules/seed/seed.module';
     DocumentsModule, DiligencesModule, AccountingModule,
     PriceResearchModule, IntegrationsServicesModule,
     AuditModule, SettingsModule, DashboardModule, ReportsModule,
+    DiagnosticsModule,
     SeedModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

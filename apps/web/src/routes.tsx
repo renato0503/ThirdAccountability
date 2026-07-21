@@ -23,6 +23,7 @@ import { ChatIaPage } from '@/features/price-research/chat-ia-page';
 import { AuditPage } from '@/features/audit/audit-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 import { ReportsPage } from '@/features/reports/reports-page';
+import { DiagnosticsPage } from '@/features/diagnostics/diagnostics-page';
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
       { path: 'auditoria', element: <AuditPage /> },
       { path: 'relatorios', element: <ReportsPage /> },
       { path: 'configuracoes', element: <SettingsPage /> },
+      { path: 'sistema/diagnostico', element: <DiagnosticsPage /> },
     ],
   },
 ]);

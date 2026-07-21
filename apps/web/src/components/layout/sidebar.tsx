@@ -14,6 +14,7 @@ import {
   Settings,
   ShieldCheck,
   ClipboardList,
+  Activity,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -42,6 +43,7 @@ const adminItems = [
   { icon: ShieldCheck, label: 'Auditoria', path: '/auditoria' },
   { icon: ClipboardList, label: 'Relatórios', path: '/relatorios' },
   { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+  { icon: Activity, label: 'Diagnóstico', path: '/sistema/diagnostico' },
 ];
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
