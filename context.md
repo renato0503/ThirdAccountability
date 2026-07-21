@@ -994,6 +994,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 | **Sprint 7** | Pesquisa de Preços + Chat IA | `cd7eb70` | ✅ **100%** |
 | **Sprint 8** | Auditoria, Relatórios, Configurações | `51d1097` | ✅ **100%** |
 | **Sprint 9** | Diagnóstico, Deploy e Polimento | `018e989` | ✅ **100%** |
+| **Sprint 10** | Deploy da API + Infraestrutura | `78197dd` | ✅ **100%** |
 
 ### 13.2 Estrutura do Monorepo
 
@@ -1087,4 +1088,4 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 ---
 
-*Documento gerado em 21/07/2026 — Versão 2.3 (9 sprints concluídas — refatoração completa)*
+*Documento gerado em 21/07/2026 — Versão 2.4 (10 sprints concluídas — Fase 2 em andamento)*

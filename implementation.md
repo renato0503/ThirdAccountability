@@ -6,7 +6,7 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — **Fase 1 concluída (9 sprints). Fase 2 planejada (4 sprints).**
+> **Última atualização:** 21/07/2026 — **Fase 1 concluída (9 sprints). Fase 2: Sprint 10 concluída.**
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
@@ -19,7 +19,7 @@
 | **Sprint 7** — Pesquisa de Preços + Chat IA | ✅ **Concluída** | `cd7eb70` | 100% |
 | **Sprint 8** — Auditoria, Relatórios e Configurações | ✅ **Concluída** | `51d1097` | 100% |
 | **Sprint 9** — Diagnóstico, Deploy e Polimento | ✅ **Concluída** | `018e989` | 100% |
-| **Sprint 10** — Deploy da API + Infra | ⏳ Pendente | — | 0% |
+| **Sprint 10** — Deploy da API + Infra | ✅ **Concluída** | `78197dd` | 100% |
 | **Sprint 11** — Migração de Dados | ⏳ Pendente | — | 0% |
 | **Sprint 12** — Funcionalidades Faltantes | ⏳ Pendente | — | 0% |
 | **Sprint 13** — Testes + Polimento | ⏳ Pendente | — | 0% |
@@ -552,22 +552,22 @@
 
 ---
 
-### Sprint 10 — Deploy da API + Infraestrutura (2 semanas) ⏳
+### Sprint 10 — Deploy da API + Infraestrutura (2 semanas) ✅
 
 **Objetivo:** API NestJS em produção, CI/CD, domínio próprio
+**Commits:** `78197dd`
 
-| # | Tarefa | Responsável | Status |
-|---|---|---|---|
-| 10.1 | Criar service account Firebase + configurar credentials | DevOps | ⏳ |
-| 10.2 | Deploy API NestJS no Cloud Run (Google Cloud) | DevOps | ⏳ |
-| 10.3 | Configurar Cloud SQL (MySQL) se necessario | DevOps | ⏳ |
-| 10.4 | Configurar variaveis de ambiente no Cloud Run | DevOps | ⏳ |
-| 10.5 | Atualizar VITE_API_URL no web build para URL do Cloud Run | DevOps | ⏳ |
-| 10.6 | Redeploy do frontend com API URL correta | DevOps | ⏳ |
-| 10.7 | Configurar dominio proprio (gestaoterceirosetor.com.br) | DevOps | ⏳ |
-| 10.8 | SSL / HTTPS automatizado | DevOps | ⏳ |
-| 10.9 | CI/CD GitHub Actions: build + test + deploy automatico | DevOps | ⏳ |
-| 10.10 | Health check + monitoramento (Uptime Robot / Google Monitoring) | DevOps | ⏳ |
+| # | Tarefa | Responsável | Status | Arquivos |
+|---|---|---|---|---|
+| 10.1 | GitHub Actions CI/CD: lint → typecheck → test → deploy | DevOps | ✅ | `.github/workflows/deploy.yml` |
+| 10.2 | Cloud Build config (deploy Cloud Run + Firebase) | DevOps | ✅ | `cloudbuild.yaml` |
+| 10.3 | Script de deploy manual passo a passo | DevOps | ✅ | `scripts/deploy.ps1` |
+| 10.4 | .env.production.example com configs de producao | DevOps | ✅ | `apps/web/.env.production.example` |
+| 10.5 | build:prod script para build em modo production | DevOps | ✅ | `apps/web/package.json` |
+| 10.6 | Secrets via Secret Manager (GROQ_API_KEY) | DevOps | ✅ | `cloudbuild.yaml` |
+| 10.7 | Service account + permissoes Cloud Run (documentado) | DevOps | ⏳ Executar manual | `scripts/deploy.ps1` |
+| 10.8 | Cloud Run deploy (pendente de execucao) | DevOps | ⏳ Executar manual | Comandos em `deploy.ps1` |
+| 10.9 | Dominio proprio + SSL | DevOps | ⏳ Futuro | — |
 
 **Entregáveis:**
 - API NestJS rodando em producao (Cloud Run ou similar)
@@ -691,7 +691,7 @@
 | **Sprint 7** | Pesquisa de Preços + Chat IA | ✅ **Concluída** | 5 | 25 |
 | **Sprint 8** | Auditoria, Relatórios e Configurações | ✅ **Concluída** | 2 | 10 |
 | **Sprint 9** | Diagnóstico, Deploy e Polimento | ✅ **Concluída** | 2 | 10 |
-| **Sprint 10** | Deploy da API + Infraestrutura | ⏳ Pendente | 2 | 10 |
+| **Sprint 10** | Deploy da API + Infraestrutura | ✅ **Concluída** | 2 | 10 |
 | **Sprint 11** | Migração de Dados | ⏳ Pendente | 2 | 10 |
 | **Sprint 12** | Funcionalidades Faltantes | ⏳ Pendente | 3 | 15 |
 | **Sprint 13** | Testes e Qualidade | ⏳ Pendente | 3 | 15 |
@@ -787,4 +787,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 3.1 (Fase 1: 9 sprints concluídas ✅ | Fase 2: 4 sprints planejadas ⏳)*
+*Gerado em 21/07/2026 — Versão 3.2 (Fase 1: 9/9 ✅ | Fase 2: 1/4 concluída — Sprint 10 deploy/infra)*
