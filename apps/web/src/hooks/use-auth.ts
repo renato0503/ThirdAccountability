@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -18,15 +19,25 @@ export function useAuth() {
 
   const clearError = () => setError(null);
 
+  // Handle redirect result (Google login)
+  useEffect(() => {
+    getRedirectResult(auth).then(async (result) => {
+      if (result?.user) {
+        syncUser().catch(() => {});
+      }
+    }).catch(() => {});
+  }, []);
+
+  const doSync = () => syncUser().catch(() => {});
+
   const login = async (email: string, password: string) => {
     try {
       setError(null);
       const result = await signInWithEmailAndPassword(auth, email, password);
-      await syncUser();
+      doSync();
       return result.user;
     } catch (err: any) {
-      const message = getFirebaseErrorMessage(err.code);
-      setError(message);
+      setError(getFirebaseErrorMessage(err.code));
       throw err;
     }
   };
@@ -36,11 +47,10 @@ export function useAuth() {
       setError(null);
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName: name });
-      await syncUser();
+      doSync();
       return result.user;
     } catch (err: any) {
-      const message = getFirebaseErrorMessage(err.code);
-      setError(message);
+      setError(getFirebaseErrorMessage(err.code));
       throw err;
     }
   };
@@ -49,12 +59,9 @@ export function useAuth() {
     try {
       setError(null);
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      await syncUser();
-      return result.user;
+      await signInWithRedirect(auth, provider);
     } catch (err: any) {
-      const message = getFirebaseErrorMessage(err.code);
-      setError(message);
+      setError(getFirebaseErrorMessage(err.code));
       throw err;
     }
   };
@@ -68,28 +75,19 @@ export function useAuth() {
       setError(null);
       await sendPasswordResetEmail(auth, email);
     } catch (err: any) {
-      const message = getFirebaseErrorMessage(err.code);
-      setError(message);
+      setError(getFirebaseErrorMessage(err.code));
       throw err;
     }
   };
 
   return {
-    user,
-    loading,
-    initialized,
-    error,
-    clearError,
-    login,
-    register,
-    loginWithGoogle,
-    logout,
-    resetPassword,
+    user, loading, initialized, error, clearError,
+    login, register, loginWithGoogle, logout, resetPassword,
   };
 }
 
 function getFirebaseErrorMessage(code: string): string {
-  const messages: Record<string, string> = {
+  const map: Record<string, string> = {
     'auth/user-not-found': 'Usuario nao encontrado',
     'auth/wrong-password': 'Senha incorreta',
     'auth/invalid-credential': 'Email ou senha invalidos',
@@ -97,8 +95,7 @@ function getFirebaseErrorMessage(code: string): string {
     'auth/weak-password': 'Senha deve ter no minimo 6 caracteres',
     'auth/invalid-email': 'Email invalido',
     'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde',
-    'auth/popup-closed-by-user': 'Login cancelado',
     'auth/network-request-failed': 'Erro de conexao. Verifique sua internet',
   };
-  return messages[code] || 'Erro de autenticacao. Tente novamente.';
+  return map[code] || 'Erro de autenticacao. Tente novamente.';
 }
