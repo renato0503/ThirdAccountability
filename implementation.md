@@ -6,7 +6,7 @@
 
 ## Progresso Atual
 
-> **Última atualização:** 21/07/2026 — **Todas as 9 sprints concluídas!** ✅
+> **Última atualização:** 21/07/2026 — **Fase 1 concluída (9 sprints). Fase 2 planejada (4 sprints).**
 
 | Sprint | Status | Commits | % |
 |---|---|---|---|
@@ -19,6 +19,10 @@
 | **Sprint 7** — Pesquisa de Preços + Chat IA | ✅ **Concluída** | `cd7eb70` | 100% |
 | **Sprint 8** — Auditoria, Relatórios e Configurações | ✅ **Concluída** | `51d1097` | 100% |
 | **Sprint 9** — Diagnóstico, Deploy e Polimento | ✅ **Concluída** | `018e989` | 100% |
+| **Sprint 10** — Deploy da API + Infra | ⏳ Pendente | — | 0% |
+| **Sprint 11** — Migração de Dados | ⏳ Pendente | — | 0% |
+| **Sprint 12** — Funcionalidades Faltantes | ⏳ Pendente | — | 0% |
+| **Sprint 13** — Testes + Polimento | ⏳ Pendente | — | 0% |
 
 ---
 
@@ -548,10 +552,136 @@
 
 ---
 
+### Sprint 10 — Deploy da API + Infraestrutura (2 semanas) ⏳
+
+**Objetivo:** API NestJS em produção, CI/CD, domínio próprio
+
+| # | Tarefa | Responsável | Status |
+|---|---|---|---|
+| 10.1 | Criar service account Firebase + configurar credentials | DevOps | ⏳ |
+| 10.2 | Deploy API NestJS no Cloud Run (Google Cloud) | DevOps | ⏳ |
+| 10.3 | Configurar Cloud SQL (MySQL) se necessario | DevOps | ⏳ |
+| 10.4 | Configurar variaveis de ambiente no Cloud Run | DevOps | ⏳ |
+| 10.5 | Atualizar VITE_API_URL no web build para URL do Cloud Run | DevOps | ⏳ |
+| 10.6 | Redeploy do frontend com API URL correta | DevOps | ⏳ |
+| 10.7 | Configurar dominio proprio (gestaoterceirosetor.com.br) | DevOps | ⏳ |
+| 10.8 | SSL / HTTPS automatizado | DevOps | ⏳ |
+| 10.9 | CI/CD GitHub Actions: build + test + deploy automatico | DevOps | ⏳ |
+| 10.10 | Health check + monitoramento (Uptime Robot / Google Monitoring) | DevOps | ⏳ |
+
+**Entregáveis:**
+- API NestJS rodando em producao (Cloud Run ou similar)
+- Frontend React apontando para API real
+- CI/CD automatizado (GitHub Actions)
+- Dominio propio com SSL
+- Monitoramento de uptime
+
+---
+
+### Sprint 11 — Migração de Dados (2 semanas) ⏳
+
+**Objetivo:** Transportar dados do Laravel/MySQL para o Firestore
+
+| # | Tarefa | Responsável | Status |
+|---|---|---|---|
+| 11.1 | Analisar schema MySQL e mapear para Firestore collections | Backend | ⏳ |
+| 11.2 | Script: exportar usuarios do MySQL → Firestore | Backend | ⏳ |
+| 11.3 | Script: exportar instituicoes + diretores + historico | Backend | ⏳ |
+| 11.4 | Script: exportar projetos + sub-entities | Backend | ⏳ |
+| 11.5 | Script: exportar metas + atividades + comprovacoes + aprovacoes | Backend | ⏳ |
+| 11.6 | Script: exportar despesas + budget items | Backend | ⏳ |
+| 11.7 | Script: exportar documentos → Firebase Storage + metadata | Backend | ⏳ |
+| 11.8 | Script: exportar diligencias + respostas + pareceres | Backend | ⏳ |
+| 11.9 | Script: exportar prestacao de contas + fotos → Firebase Storage | Backend | ⏳ |
+| 11.10 | Script: exportar pesquisa de precos + resultados | Backend | ⏳ |
+| 11.11 | Script: exportar audit logs | Backend | ⏳ |
+| 11.12 | Script: exportar configuracoes (settings) | Backend | ⏳ |
+| 11.13 | Migrar arquivos de storage local → Firebase Storage | Backend | ⏳ |
+| 11.14 | Verificar integridade: contar registros origem vs destino | QA | ⏳ |
+
+**Entregáveis:**
+- Scripts de migracao para cada entidade
+- Dados historicos disponiveis no novo sistema
+- Arquivos migrados para Firebase Storage
+- Relatorio de integridade (counts origem vs destino)
+
+---
+
+### Sprint 12 — Funcionalidades Faltantes (3 semanas) ⏳
+
+**Objetivo:** Completar funcionalidades que ficaram de fora da Fase 1
+
+| # | Tarefa | Responsável | Prioridade |
+|---|---|---|---|
+| 12.1 | PDF da ficha da instituicao (Puppeteer) | Backend | Alta |
+| 12.2 | PDF do inventario do projeto (Puppeteer) | Backend | Alta |
+| 12.3 | PDF do relatorio comparativo de precos (Puppeteer) | Backend | Alta |
+| 12.4 | Upload de foto do presidente → Firebase Storage | Frontend | Alta |
+| 12.5 | Upload de fotos de capacidade tecnica → Firebase Storage | Frontend | Alta |
+| 12.6 | Upload de comprovacoes de metas → Firebase Storage | Frontend | Alta |
+| 12.7 | Timeline visual de status do projeto | Frontend | Media |
+| 12.8 | Notificacoes em tempo real (Firebase Realtime DB ou Cloud Messaging) | Backend | Media |
+| 12.9 | Exportar CSV/Excel de despesas e relatorios | Frontend | Media |
+| 12.10 | Dark mode persistente (localStorage) | Frontend | Baixa |
+| 12.11 | Responsividade mobile refinada | Frontend | Baixa |
+| 12.12 | Paginacao em todas as listas (verificar) | Frontend | Media |
+| 12.13 | Filtros avancados em todas as listas | Frontend | Media |
+| 12.14 | Loading states / spinners em operacoes demoradas | Frontend | Media |
+| 12.15 | Confirmacao em todas as exclusoes | Frontend | Media |
+| 12.16 | Autocomplete CNPJ/BrasilAPI no formulario de instituicao | Frontend | ✅ Ja feito |
+| 12.17 | Autocomplete CEP/ViaCEP no formulario de instituicao | Frontend | ✅ Ja feito |
+| 12.18 | Autocomplete CNPJ no orcamento manual (Chat IA) | Frontend | Media |
+| 12.19 | Integracao Radar TCE-MT (servico existente no Laravel) | Backend | Baixa |
+| 12.20 | Auditoria real: interceptor escrevendo no Firestore | Backend | Media |
+
+**Entregáveis:**
+- PDFs de instituicao, projeto e pesquisa de precos
+- Upload de fotos e comprovacoes via Firebase Storage
+- Timeline de status, notificacoes, exportacao CSV
+- Polimento de UX: loading, confirmacao, responsividade
+
+---
+
+### Sprint 13 — Testes e Qualidade (3 semanas) ⏳
+
+**Objetivo:** Garantir qualidade com testes automatizados
+
+| # | Tarefa | Responsável | Tipo |
+|---|---|---|---|
+| 13.1 | Configurar Jest + Supertest para testes NestJS | Backend | Infra |
+| 13.2 | Teste unitario: AuthService (verifyToken, syncUser) | Backend | Unitario |
+| 13.3 | Teste unitario: Cnpj validation | Backend | Unitario |
+| 13.4 | Teste unitario: PriceResearchAggregator (stats) | Backend | Unitario |
+| 13.5 | Teste unitario: Project code generation | Backend | Unitario |
+| 13.6 | Teste de integracao: Institutions CRUD | Backend | Integracao |
+| 13.7 | Teste de integracao: Projects CRUD + sub-entities | Backend | Integracao |
+| 13.8 | Teste de integracao: Goals workflow (send-analysis, approve, disapprove) | Backend | Integracao |
+| 13.9 | Teste de integracao: Expenses status workflow | Backend | Integracao |
+| 13.10 | Teste de integracao: Diligences workflow | Backend | Integracao |
+| 13.11 | Teste de integracao: Chat IA (processar, selecionar, orcamento-manual) | Backend | Integracao |
+| 13.12 | Configurar Cypress para testes E2E | Frontend | Infra |
+| 13.13 | Teste E2E: Fluxo de login + dashboard | Frontend | E2E |
+| 13.14 | Teste E2E: CRUD instituicao | Frontend | E2E |
+| 13.15 | Teste E2E: Criacao de projeto wizard | Frontend | E2E |
+| 13.16 | Teste E2E: Fluxo de meta (criar → analisar → aprovar) | Frontend | E2E |
+| 13.17 | Teste E2E: Fluxo de despesa (criar → aprovar → pagar) | Frontend | E2E |
+| 13.18 | Teste E2E: Chat IA (texto → processar → selecionar → finalizar) | Frontend | E2E |
+| 13.19 | Teste de seguranca: RBAC (tentar acessar rota sem permissao) | QA | Seguranca |
+| 13.20 | Teste de performance: Firestore reads optimization | QA | Performance |
+
+**Entregáveis:**
+- Suite de testes unitarios (NestJS)
+- Suite de testes de integracao (NestJS)
+- Suite de testes E2E (Cypress)
+- Testes de seguranca RBAC
+- Relatorio de cobertura
+
+---
+
 ## 6. Resumo de Esforço
 
 | Sprint | Módulos | Status | Semanas | Dias Úteis |
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 | **Sprint 1** | Fundação e Setup | ✅ **Concluída** | 3 | 15 |
 | **Sprint 2** | Autenticação e Usuários | ✅ **Concluída** | 2 | 10 |
 | **Sprint 3** | Instituições | ✅ **Concluída** | 3 | 15 |
@@ -561,7 +691,12 @@
 | **Sprint 7** | Pesquisa de Preços + Chat IA | ✅ **Concluída** | 5 | 25 |
 | **Sprint 8** | Auditoria, Relatórios e Configurações | ✅ **Concluída** | 2 | 10 |
 | **Sprint 9** | Diagnóstico, Deploy e Polimento | ✅ **Concluída** | 2 | 10 |
-| **Total** | | ✅ **100%** | **30 semanas** | **~150 dias úteis** |
+| **Sprint 10** | Deploy da API + Infraestrutura | ⏳ Pendente | 2 | 10 |
+| **Sprint 11** | Migração de Dados | ⏳ Pendente | 2 | 10 |
+| **Sprint 12** | Funcionalidades Faltantes | ⏳ Pendente | 3 | 15 |
+| **Sprint 13** | Testes e Qualidade | ⏳ Pendente | 3 | 15 |
+| **Total Fase 1** | | ✅ **100%** | **30 semanas** | **~150 dias** |
+| **Total Fase 2** | | ⏳ **Pendente** | **10 semanas** | **~50 dias** |
 
 ---
 
@@ -652,4 +787,4 @@ service cloud.firestore {
 
 ---
 
-*Gerado em 21/07/2026 — Versão 3.0 (Todas as 9 sprints concluídas — refatoração completa Laravel → NestJS + React + Firebase)*
+*Gerado em 21/07/2026 — Versão 3.1 (Fase 1: 9 sprints concluídas ✅ | Fase 2: 4 sprints planejadas ⏳)*
